@@ -10,14 +10,14 @@ public class EnemyMovementSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         enemyGroup = GetComponentGroup(
-            typeof(EnemyData),
-            typeof(HealthData),
+            ComponentType.Create<EnemyData>(),
+            ComponentType.Create<HealthData>(),
             ComponentType.Create<NavMeshAgent>(),
             ComponentType.Subtractive<DeadData>());
         playerGroup = GetComponentGroup(
-            typeof(Transform),
-            typeof(PlayerData),
-            typeof(HealthData));
+            ComponentType.Create<Transform>(),
+            ComponentType.Create<PlayerData>(),
+            ComponentType.Create<HealthData>());
     }
 
     protected override void OnUpdate()

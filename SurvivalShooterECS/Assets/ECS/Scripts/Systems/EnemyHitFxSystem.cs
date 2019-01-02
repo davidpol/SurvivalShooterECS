@@ -9,13 +9,12 @@ public class EnemyHitFxSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         enemyGroup = EntityManager.CreateComponentGroup(
-            typeof(Transform),
-            typeof(EnemyData),
-            typeof(DamagedData),
+            ComponentType.Create<Transform>(),
+            ComponentType.Create<EnemyData>(),
+            ComponentType.Create<DamagedData>(),
             ComponentType.Create<Animator>(),
             ComponentType.Create<AudioSource>(),
-            ComponentType.Create<CapsuleCollider>()
-        );
+            ComponentType.Create<CapsuleCollider>());
     }
 
     protected override void OnUpdate()

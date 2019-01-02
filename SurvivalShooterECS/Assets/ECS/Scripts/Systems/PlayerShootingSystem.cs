@@ -11,15 +11,15 @@ public class PlayerShootingSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         gunGroup = GetComponentGroup(
-            typeof(Transform),
+            ComponentType.Create<Transform>(),
             ComponentType.Create<PlayerGunData>(),
             ComponentType.Create<ParticleSystem>(),
             ComponentType.Create<LineRenderer>(),
             ComponentType.Create<AudioSource>(),
             ComponentType.Create<Light>());
         playerGroup = GetComponentGroup(
-            typeof(PlayerData),
-            typeof(HealthData));
+            ComponentType.Create<PlayerData>(),
+            ComponentType.Create<HealthData>());
     }
 
     protected override void OnUpdate()

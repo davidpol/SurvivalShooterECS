@@ -9,7 +9,7 @@ public class PlayerInputSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         inputGroup = GetComponentGroup(
-            typeof(PlayerInputData),
+            ComponentType.Create<PlayerInputData>(),
             ComponentType.Subtractive<DeadData>());
     }
 

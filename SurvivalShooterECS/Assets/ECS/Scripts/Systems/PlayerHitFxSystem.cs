@@ -12,7 +12,7 @@ public class PlayerHitFxSystem : ComponentSystem
     {
         hpUpdatedGroup = EntityManager.CreateComponentGroup(typeof(HealthUpdatedData));
         playerGroup = EntityManager.CreateComponentGroup(
-            typeof(PlayerData),
+            ComponentType.Create<PlayerData>(),
             ComponentType.Create<Animator>(),
             ComponentType.Create<AudioSource>()
         );

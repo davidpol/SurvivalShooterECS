@@ -10,7 +10,9 @@ public class CameraFollowSystem : ComponentSystem
 
     protected override void OnCreateManager()
     {
-        playerInputGroup = GetComponentGroup(typeof(PlayerInputData), typeof(Transform));
+        playerInputGroup = GetComponentGroup(
+            ComponentType.Create<Transform>(),
+            ComponentType.Create<PlayerInputData>());
     }
 
     protected override void OnUpdate()

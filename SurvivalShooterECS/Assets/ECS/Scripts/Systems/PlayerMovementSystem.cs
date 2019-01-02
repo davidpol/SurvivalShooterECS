@@ -8,7 +8,7 @@ public class PlayerMovementSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         inputGroup = GetComponentGroup(
-            typeof(Transform),
+            ComponentType.Create<Transform>(),
             ComponentType.ReadOnly<PlayerInputData>(),
             ComponentType.Create<Rigidbody>(),
             ComponentType.Subtractive<DeadData>());

@@ -8,8 +8,8 @@ public class PlayerTurningSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         playerGroup = GetComponentGroup(
-            typeof(Transform),
-            typeof(PlayerData),
+            ComponentType.Create<Transform>(),
+            ComponentType.Create<PlayerData>(),
             ComponentType.Create<Rigidbody>(),
             ComponentType.Subtractive<DeadData>());
     }
