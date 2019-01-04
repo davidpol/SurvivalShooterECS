@@ -18,8 +18,8 @@ public class PlayerShootingSystem : ComponentSystem
             ComponentType.Create<AudioSource>(),
             ComponentType.Create<Light>());
         playerGroup = GetComponentGroup(
-            ComponentType.Create<PlayerData>(),
-            ComponentType.Create<HealthData>());
+            ComponentType.ReadOnly<PlayerData>(),
+            ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()

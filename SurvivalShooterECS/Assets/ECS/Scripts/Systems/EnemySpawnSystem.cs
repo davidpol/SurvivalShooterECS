@@ -14,8 +14,8 @@ public class EnemySpawnSystem : ComponentSystem
     {
         spawnerGroup = GetComponentGroup(ComponentType.Create<EnemySpawner>());
         playerGroup = GetComponentGroup(
-            ComponentType.Create<PlayerData>(),
-            ComponentType.Create<HealthData>());
+            ComponentType.ReadOnly<PlayerData>(),
+            ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()

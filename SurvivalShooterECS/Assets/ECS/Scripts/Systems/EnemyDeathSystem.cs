@@ -12,8 +12,8 @@ public class EnemyDeathSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         enemyGroup = GetComponentGroup(
-            ComponentType.Create<EnemyData>(),
-            ComponentType.Create<DeadData>(),
+            ComponentType.ReadOnly<EnemyData>(),
+            ComponentType.ReadOnly<DeadData>(),
             ComponentType.Create<CapsuleCollider>(),
             ComponentType.Create<Animator>(),
             ComponentType.Create<AudioSource>());

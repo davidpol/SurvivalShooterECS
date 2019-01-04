@@ -10,11 +10,9 @@ public class EnemyHitFxSystem : ComponentSystem
     {
         enemyGroup = EntityManager.CreateComponentGroup(
             ComponentType.Create<Transform>(),
-            ComponentType.Create<EnemyData>(),
-            ComponentType.Create<DamagedData>(),
-            ComponentType.Create<Animator>(),
-            ComponentType.Create<AudioSource>(),
-            ComponentType.Create<CapsuleCollider>());
+            ComponentType.ReadOnly<EnemyData>(),
+            ComponentType.ReadOnly<DamagedData>(),
+            ComponentType.Create<AudioSource>());
     }
 
     protected override void OnUpdate()

@@ -9,7 +9,7 @@ public class PlayerTurningSystem : ComponentSystem
     {
         playerGroup = GetComponentGroup(
             ComponentType.Create<Transform>(),
-            ComponentType.Create<PlayerData>(),
+            ComponentType.ReadOnly<PlayerData>(),
             ComponentType.Create<Rigidbody>(),
             ComponentType.Subtractive<DeadData>());
     }

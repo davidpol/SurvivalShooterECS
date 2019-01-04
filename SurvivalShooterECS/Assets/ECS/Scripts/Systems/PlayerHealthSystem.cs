@@ -21,16 +21,15 @@ public class PlayerHealthSystem : JobComponentSystem
         public void Execute(
             Entity entity,
             int index,
-            ref PlayerData playerData,
+            [ReadOnly] ref PlayerData playerData,
             ref HealthData healthData,
             ref DamagedData damagedData)
         {
-            var newHealth = healthData.Value -= damagedData.Damage;
-            Ecb.SetComponent(index, entity, new HealthData { Value = newHealth });
-            Ecb.RemoveComponent(index, entity, typeof(DamagedData));
+            healthData.Value -= damagedData.Damage;
+            Ecb.RemoveComponent<DamagedData>(index, entity);
             Ecb.CreateEntity(index, HealthUpdatedArchetype);
-            Ecb.SetComponent(index, new HealthUpdatedData { Health = newHealth });
-            if (newHealth <= 0 && !Dead.Exists(entity))
+            Ecb.SetComponent(index, new HealthUpdatedData { Health = healthData.Value });
+            if (healthData.Value <= 0 && !Dead.Exists(entity))
                 Ecb.AddComponent(index, entity, new DeadData());
         }
     }

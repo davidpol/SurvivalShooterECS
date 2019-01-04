@@ -13,14 +13,13 @@ public class EnemyHealthSystem : JobComponentSystem
         public void Execute(
             Entity entity,
             int index,
-            ref EnemyData enemyData,
+            [ReadOnly] ref EnemyData enemyData,
             ref HealthData healthData,
             ref DamagedData damagedData)
         {
-            var newHealth = healthData.Value -= damagedData.Damage;
-            Ecb.SetComponent(index, entity, new HealthData { Value = newHealth });
-            Ecb.RemoveComponent(index, entity, typeof(DamagedData));
-            if (newHealth <= 0 && !Dead.Exists(entity))
+            healthData.Value -= damagedData.Damage;
+            Ecb.RemoveComponent<DamagedData>(index, entity);
+            if (healthData.Value <= 0 && !Dead.Exists(entity))
                 Ecb.AddComponent(index, entity, new DeadData());
         }
     }

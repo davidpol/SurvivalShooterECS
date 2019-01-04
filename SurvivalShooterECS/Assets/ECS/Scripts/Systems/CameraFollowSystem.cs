@@ -12,7 +12,7 @@ public class CameraFollowSystem : ComponentSystem
     {
         playerInputGroup = GetComponentGroup(
             ComponentType.Create<Transform>(),
-            ComponentType.Create<PlayerInputData>());
+            ComponentType.ReadOnly<PlayerInputData>());
     }
 
     protected override void OnUpdate()
