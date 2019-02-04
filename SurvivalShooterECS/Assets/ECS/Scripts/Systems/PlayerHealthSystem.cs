@@ -51,6 +51,8 @@ public class PlayerHealthSystem : JobComponentSystem
             HealthUpdatedArchetype = healthUpdatedArchetype,
             Dead = GetComponentDataFromEntity<DeadData>()
         };
-        return job.Schedule(this, inputDeps);
+        inputDeps = job.Schedule(this, inputDeps);
+        inputDeps.Complete();
+        return inputDeps;
     }
 }
