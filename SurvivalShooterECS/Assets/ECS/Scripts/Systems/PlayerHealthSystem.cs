@@ -35,14 +35,19 @@ public class PlayerHealthSystem : JobComponentSystem
     }
     
 #pragma warning disable 649
-    [Inject] private EndFrameBarrier endFrameBarrier;
+    // ReSharper disable once ClassNeverInstantiated.Local
+    private class SystemBarrier : BarrierSystem
+    {
+    }
+    
+    [Inject] private SystemBarrier barrier;
 #pragma warning restore 649
     
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new PlayerHealthJob
         {
-            Ecb = endFrameBarrier.CreateCommandBuffer().ToConcurrent(),
+            Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
             HealthUpdatedArchetype = healthUpdatedArchetype,
             Dead = GetComponentDataFromEntity<DeadData>()
         };

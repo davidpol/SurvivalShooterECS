@@ -18,7 +18,9 @@ public class EnemyAttackingSystem : JobComponentSystem
         {
             attackData.Timer += DeltaTime;
 
-            if (attackData.Timer >= attackData.Frequency && Health[attackData.Source].Value > 0)
+            if (attackData.Timer >= attackData.Frequency &&
+                Health.Exists(attackData.Source) &&
+                Health[attackData.Source].Value > 0)
             {
                 attackData.Timer = 0f;
 
@@ -30,14 +32,19 @@ public class EnemyAttackingSystem : JobComponentSystem
     }
 
 #pragma warning disable 649
-    [Inject] private EndFrameBarrier endFrameBarrier;
+    // ReSharper disable once ClassNeverInstantiated.Local
+    private class SystemBarrier : BarrierSystem
+    {
+    }
+    
+    [Inject] private SystemBarrier barrier;
 #pragma warning restore 649
     
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new EnemyAttackJob
         {
-            Ecb = endFrameBarrier.CreateCommandBuffer().ToConcurrent(),
+            Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
             DeltaTime = Time.deltaTime,
             Health = GetComponentDataFromEntity<HealthData>(),
             Damaged = GetComponentDataFromEntity<DamagedData>()
