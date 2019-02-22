@@ -27,8 +27,8 @@ public class PlayerHealthSystem : JobComponentSystem
         {
             healthData.Value -= damagedData.Damage;
             Ecb.RemoveComponent<DamagedData>(index, entity);
-            Ecb.CreateEntity(index, HealthUpdatedArchetype);
-            Ecb.SetComponent(index, new HealthUpdatedData { Health = healthData.Value });
+            var e = Ecb.CreateEntity(index, HealthUpdatedArchetype);
+            Ecb.SetComponent(index, e, new HealthUpdatedData { Health = healthData.Value });
             if (healthData.Value <= 0 && !Dead.Exists(entity))
                 Ecb.AddComponent(index, entity, new DeadData());
         }

@@ -81,7 +81,8 @@ public class PlayerShootingSystem : ComponentSystem
             {
                 var hitEntity = shootHit.collider.gameObject.GetComponent<GameObjectEntity>().Entity;
                 var entityManager = World.GetExistingManager<EntityManager>();
-                entityManager.AddComponentData(hitEntity, new DamagedData { Damage = SurvivalShooterBootstrap.Settings.DamagePerShot, HitPoint = shootHit.point });
+                if (!entityManager.HasComponent<DamagedData>(hitEntity))
+                    entityManager.AddComponentData(hitEntity, new DamagedData { Damage = SurvivalShooterBootstrap.Settings.DamagePerShot, HitPoint = shootHit.point });
             }
 
             lineRenderer[i].SetPosition(1, shootHit.point);
