@@ -5,6 +5,13 @@ using UnityEngine;
 
 public class EnemyAttackingSystem : JobComponentSystem
 {
+    private EndSimulationEntityCommandBufferSystem barrier;
+
+    protected override void OnCreateManager()
+    {
+        barrier = World.GetOrCreateManager<EndSimulationEntityCommandBufferSystem>();
+    }
+
     private struct EnemyAttackJob : IJobProcessComponentDataWithEntity<EnemyAttackData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
@@ -31,15 +38,6 @@ public class EnemyAttackingSystem : JobComponentSystem
         }
     }
 
-#pragma warning disable 649
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private class SystemBarrier : BarrierSystem
-    {
-    }
-    
-    [Inject] private SystemBarrier barrier;
-#pragma warning restore 649
-    
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new EnemyAttackJob
@@ -50,6 +48,9 @@ public class EnemyAttackingSystem : JobComponentSystem
             Damaged = GetComponentDataFromEntity<DamagedData>()
             
         };
-        return job.Schedule(this, inputDeps);
+        inputDeps = job.Schedule(this, inputDeps);
+        inputDeps.Complete();
+        barrier.AddJobHandleForProducer(inputDeps);
+        return inputDeps;
     }
 }

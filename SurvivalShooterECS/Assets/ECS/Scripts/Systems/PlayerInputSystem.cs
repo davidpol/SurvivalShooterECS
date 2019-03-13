@@ -4,25 +4,24 @@ using UnityEngine;
 
 public class PlayerInputSystem : ComponentSystem
 {
-    private ComponentGroup inputGroup;
+    private ComponentGroup group;
 
     protected override void OnCreateManager()
     {
-        inputGroup = GetComponentGroup(
-            ComponentType.Create<PlayerInputData>(),
-            ComponentType.Subtractive<DeadData>());
+        group = GetComponentGroup(
+            ComponentType.ReadOnly<PlayerInputData>(),
+            ComponentType.Exclude<DeadData>());
     }
 
     protected override void OnUpdate()
     {
-        var input = inputGroup.GetComponentDataArray<PlayerInputData>();
-        for (var i = 0; i < input.Length; i++)
+        Entities.With(group).ForEach(entity =>
         {
             var newInput = new PlayerInputData
             {
                 Move = new float2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"))
             };
-            input[i] = newInput;
-        }
+            PostUpdateCommands.SetComponent(entity, newInput);
+        });
     }
 }

@@ -12,26 +12,36 @@ public class EnemyMovementSystem : ComponentSystem
         enemyGroup = GetComponentGroup(
             ComponentType.ReadOnly<EnemyData>(),
             ComponentType.ReadOnly<HealthData>(),
-            ComponentType.Create<NavMeshAgent>(),
-            ComponentType.Subtractive<DeadData>());
+            ComponentType.ReadOnly<NavMeshAgent>(),
+            ComponentType.Exclude<DeadData>());
         playerGroup = GetComponentGroup(
-            ComponentType.Create<Transform>(),
+            ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()
     {
-        var player = playerGroup.GetGameObjectArray();
-        var playerHp = playerGroup.GetComponentDataArray<HealthData>();
-        var agent = enemyGroup.GetComponentArray<NavMeshAgent>();
-        var enemyHp = enemyGroup.GetComponentDataArray<HealthData>();
-        for (var i = 0; i < agent.Length; i++)
-        {
-            if (enemyHp[i].Value > 0 && playerHp[0].Value > 0)
-                agent[i].SetDestination(player[0].transform.position);
-            else
-                agent[i].enabled = false;
-        }
+        GameObject player = null;
+        var playerHp = 0;
+
+        Entities.With(playerGroup).ForEach(
+            (Entity entity, Transform transform, ref HealthData hp) =>
+            {
+                player = transform.gameObject;
+                playerHp = hp.Value;
+            });
+
+        if (player == null)
+            return;
+
+        Entities.With(enemyGroup).ForEach(
+            (Entity entity, NavMeshAgent agent, ref HealthData hp) =>
+            {
+                if (hp.Value > 0 && playerHp > 0)
+                    agent.SetDestination(player.transform.position);
+                else
+                    agent.enabled = false;
+            });
     }
 }

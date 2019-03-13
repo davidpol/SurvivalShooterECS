@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 
 public class PlayerShootingSystem : ComponentSystem
@@ -11,12 +12,12 @@ public class PlayerShootingSystem : ComponentSystem
     protected override void OnCreateManager()
     {
         gunGroup = GetComponentGroup(
-            ComponentType.Create<Transform>(),
-            ComponentType.Create<PlayerGunData>(),
-            ComponentType.Create<ParticleSystem>(),
-            ComponentType.Create<LineRenderer>(),
-            ComponentType.Create<AudioSource>(),
-            ComponentType.Create<Light>());
+            ComponentType.ReadOnly<Transform>(),
+            ComponentType.ReadOnly<PlayerGunData>(),
+            ComponentType.ReadOnly<ParticleSystem>(),
+            ComponentType.ReadOnly<LineRenderer>(),
+            ComponentType.ReadOnly<AudioSource>(),
+            ComponentType.ReadOnly<Light>());
         playerGroup = GetComponentGroup(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
@@ -24,52 +25,57 @@ public class PlayerShootingSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        var hp = playerGroup.GetComponentDataArray<HealthData>();
+        var hp = playerGroup.ToComponentDataArray<HealthData>(Allocator.TempJob);
         if (hp.Length == 0)
+        {
+            hp.Dispose();
             return;
-        
+        }
+
         if (hp[0].Value <= 0)
+        {
+            hp.Dispose();
             return;
+        }
+        
+        hp.Dispose();
 
         timer += Time.deltaTime;
 
         var timeBetweenBullets = SurvivalShooterBootstrap.Settings.TimeBetweenBullets;
         var effectsDisplayTime = SurvivalShooterBootstrap.Settings.GunEffectsDisplayTime;
 
-        var gun = gunGroup.GetGameObjectArray();
-        for (var i = 0; i < gun.Length; i++)
-        {
-            if (Input.GetButton("Fire1") && timer > timeBetweenBullets)
-                Shoot(i);
+        Entities.With(gunGroup).ForEach(
+            (Entity entity, AudioSource audio, Light light, ParticleSystem particles, LineRenderer line) =>
+            {
+                if (Input.GetButton("Fire1") && timer > timeBetweenBullets)
+                    Shoot(audio, light, particles, line);
 
-            if (timer >= timeBetweenBullets * effectsDisplayTime)
-                DisableEffects(i);
-        }
+                if (timer >= timeBetweenBullets * effectsDisplayTime)
+                    DisableEffects(light, line);
+            });
     }
 
-    private void Shoot(int i)
+    private void Shoot(AudioSource audio, Light light, ParticleSystem particles, LineRenderer line)
     {
         timer = 0f;
 
-        var audioSource = gunGroup.GetComponentArray<AudioSource>();
-        audioSource[i].Play();
+        audio.Play();
 
-        var light = gunGroup.GetComponentArray<Light>();
-        light[i].enabled = true;
+        light.enabled = true;
 
-        var particleSystem = gunGroup.GetComponentArray<ParticleSystem>();
-        particleSystem[i].Stop();
-        particleSystem[i].Play();
+        particles.Stop();
+        particles.Play();
 
-        var go = gunGroup.GetGameObjectArray();
-        var lineRenderer = gunGroup.GetComponentArray<LineRenderer>();
-        lineRenderer[i].enabled = true;
-        lineRenderer[i].SetPosition(0, go[i].transform.position);
+        var go = audio.gameObject;
+        var pos = go.transform.position;
+        line.enabled = true;
+        line.SetPosition(0, pos);
 
         var shootRay = new Ray
         {
-            origin = go[i].transform.position,
-            direction = go[i].transform.forward
+            origin = pos,
+            direction = go.transform.forward
         };
 
         RaycastHit shootHit;
@@ -82,23 +88,24 @@ public class PlayerShootingSystem : ComponentSystem
                 var hitEntity = shootHit.collider.gameObject.GetComponent<GameObjectEntity>().Entity;
                 var entityManager = World.GetExistingManager<EntityManager>();
                 if (!entityManager.HasComponent<DamagedData>(hitEntity))
-                    entityManager.AddComponentData(hitEntity, new DamagedData { Damage = SurvivalShooterBootstrap.Settings.DamagePerShot, HitPoint = shootHit.point });
+                    PostUpdateCommands.AddComponent(hitEntity, new DamagedData
+                    {
+                        Damage = SurvivalShooterBootstrap.Settings.DamagePerShot,
+                        HitPoint = shootHit.point
+                    });
             }
 
-            lineRenderer[i].SetPosition(1, shootHit.point);
+            line.SetPosition(1, shootHit.point);
         }
         else
         {
-            lineRenderer[i].SetPosition(1, shootRay.origin + shootRay.direction * SurvivalShooterBootstrap.Settings.GunRange);
+            line.SetPosition(1, shootRay.origin + shootRay.direction * SurvivalShooterBootstrap.Settings.GunRange);
         }
     }
 
-    private void DisableEffects(int i)
+    private void DisableEffects(Light light, LineRenderer line)
     {
-        var lineRenderer = gunGroup.GetComponentArray<LineRenderer>();
-        lineRenderer[i].enabled = false;
-        
-        var light = gunGroup.GetComponentArray<Light>();
-        light[i].enabled = false;
+        light.enabled = false;
+        line.enabled = false;
     }
 }

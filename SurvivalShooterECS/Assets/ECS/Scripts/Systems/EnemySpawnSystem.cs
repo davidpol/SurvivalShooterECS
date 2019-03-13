@@ -12,7 +12,8 @@ public class EnemySpawnSystem : ComponentSystem
 
     protected override void OnCreateManager()
     {
-        spawnerGroup = GetComponentGroup(ComponentType.Create<EnemySpawner>());
+        spawnerGroup = GetComponentGroup(
+            ComponentType.ReadOnly<EnemySpawner>());
         playerGroup = GetComponentGroup(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
@@ -20,17 +21,23 @@ public class EnemySpawnSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        var playerHp = playerGroup.GetComponentDataArray<HealthData>();
-        if (playerHp.Length == 0)
-            return;
+        GameObject player = null;
+        var playerHp = 0;
 
-        if (playerHp[0].Value <= 0)
+        Entities.With(playerGroup).ForEach(
+            (Entity entity, Transform transform, ref HealthData hp) =>
+            {
+                player = transform.gameObject;
+                playerHp = hp.Value;
+            });
+
+        if (player == null || playerHp <= 0)
             return;
 
         var dt = Time.deltaTime;
         var startingHealth = SurvivalShooterBootstrap.Settings.StartingEnemyHealth;
 
-        var spawner = spawnerGroup.GetComponentArray<EnemySpawner>();
+        var spawner = spawnerGroup.ToComponentArray<EnemySpawner>();
         for (var i = 0; i < spawner.Length; i++)
         {
             if (time.Count < i + 1)
@@ -42,8 +49,8 @@ public class EnemySpawnSystem : ComponentSystem
             {
                 var enemy = Object.Instantiate(spawner[i].Enemy, spawner[i].transform.position, quaternion.identity);
                 var entity = enemy.GetComponent<GameObjectEntity>().Entity;
-                EntityManager.AddComponentData(entity, new EnemyData());
-                EntityManager.AddComponentData(entity, new HealthData { Value = startingHealth });
+                PostUpdateCommands.AddComponent(entity, new EnemyData());
+                PostUpdateCommands.AddComponent(entity, new HealthData { Value = startingHealth });
                 time[i] = 0f;
             }
         }

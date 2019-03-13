@@ -3,40 +3,41 @@ using UnityEngine;
 
 public class CameraFollowSystem : ComponentSystem
 {
-    private ComponentGroup playerInputGroup;
+    private ComponentGroup group;
     
     private bool firstFrame = true;
     private Vector3 offset;
 
     protected override void OnCreateManager()
     {
-        playerInputGroup = GetComponentGroup(
-            ComponentType.Create<Transform>(),
+        group = GetComponentGroup(
+            ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerInputData>());
     }
 
     protected override void OnUpdate()
     {
-        var playerInput = playerInputGroup.GetComponentDataArray<PlayerInputData>();
-        if (playerInput.Length == 0)
-            return;
-        
         var mainCamera = Camera.main;
         if (mainCamera == null)
             return;
         
-        var go = playerInputGroup.GetGameObjectArray();
-        var playerPos = go[0].transform.position;
+        Entities.With(group).ForEach(
+            (Entity entity, Transform transform, ref PlayerInputData data) =>
+            {
+                var go = transform.gameObject;
+                var playerPos = go.transform.position;
 
-        if (firstFrame)
-        {
-            offset = mainCamera.transform.position - playerPos;
-            firstFrame = false;
-        }
+                if (firstFrame)
+                {
+                    offset = mainCamera.transform.position - playerPos;
+                    firstFrame = false;
+                }
 
-        var smoothing = SurvivalShooterBootstrap.Settings.CamSmoothing;
-        var dt = Time.deltaTime;
-        var targetCamPos = playerPos + offset;
-        mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, targetCamPos, smoothing * dt);
+                var smoothing = SurvivalShooterBootstrap.Settings.CamSmoothing;
+                var dt = Time.deltaTime;
+                var targetCamPos = playerPos + offset;
+                mainCamera.transform.position =
+                    Vector3.Lerp(mainCamera.transform.position, targetCamPos, smoothing * dt);
+            });
     }
 }

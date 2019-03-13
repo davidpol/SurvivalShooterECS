@@ -4,6 +4,13 @@ using Unity.Jobs;
 
 public class EnemyHealthSystem : JobComponentSystem
 {
+    private EndSimulationEntityCommandBufferSystem barrier;
+
+    protected override void OnCreateManager()
+    {
+        barrier = World.GetOrCreateManager<EndSimulationEntityCommandBufferSystem>();
+    }
+
     private struct EnemyHealthJob : IJobProcessComponentDataWithEntity<EnemyData, HealthData, DamagedData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
@@ -24,17 +31,15 @@ public class EnemyHealthSystem : JobComponentSystem
         }
     }
     
-#pragma warning disable 649
-    [Inject] private EndFrameBarrier endFrameBarrier;
-#pragma warning restore 649
-    
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new EnemyHealthJob
         {
-            Ecb = endFrameBarrier.CreateCommandBuffer().ToConcurrent(),
+            Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
             Dead = GetComponentDataFromEntity<DeadData>()
         };
-        return job.Schedule(this, inputDeps);
+        inputDeps = job.Schedule(this, inputDeps);
+        barrier.AddJobHandleForProducer(inputDeps);
+        return inputDeps;
     }
 }

@@ -10,39 +10,39 @@ public class PlayerHitFxSystem : ComponentSystem
 
     protected override void OnCreateManager()
     {
-        hpUpdatedGroup = EntityManager.CreateComponentGroup(typeof(HealthUpdatedData));
+        hpUpdatedGroup = EntityManager.CreateComponentGroup(
+            ComponentType.ReadOnly<HealthUpdatedData>());
         playerGroup = EntityManager.CreateComponentGroup(
-            ComponentType.Create<PlayerData>(),
-            ComponentType.Create<Animator>(),
-            ComponentType.Create<AudioSource>()
+            ComponentType.ReadOnly<PlayerData>(),
+            ComponentType.ReadOnly<Animator>(),
+            ComponentType.ReadOnly<AudioSource>()
         );
     }
 
     protected override void OnUpdate()
     {
-        var hpUpdated = hpUpdatedGroup.GetComponentDataArray<HealthUpdatedData>();
-        if (hpUpdated.Length == 0)
-            return;
-        
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
-        for (var i = 0; i < hpUpdated.Length; ++i)
-            gameUi.OnPlayerTookDamage(hpUpdated[i].Health);
-
-        var entity = hpUpdatedGroup.GetEntityArray();
-        for (var i = 0; i < entity.Length; ++i)
-            PostUpdateCommands.DestroyEntity(entity[i]);
-
-        var audioSource = playerGroup.GetComponentArray<AudioSource>();
-            
-        if (hpUpdated[0].Health <= 0)
+        
+        Entities.With(hpUpdatedGroup).ForEach((Entity entity, ref HealthUpdatedData hp) =>
         {
-            var playerDeathClip = SurvivalShooterBootstrap.Settings.PlayerDeathClip;
-            audioSource[0].clip = playerDeathClip;
+            PostUpdateCommands.DestroyEntity(entity);
+            gameUi.OnPlayerTookDamage(hp.Health);
 
-            var animators = playerGroup.GetComponentArray<Animator>();
-            animators[0].SetTrigger(DieHash);
-        }
+            var health = hp.Health;
+            Entities.With(playerGroup).ForEach((AudioSource audio, Animator animator) =>
+            {
+                if (health <= 0)
+                {
+                    var playerDeathClip = SurvivalShooterBootstrap.Settings.PlayerDeathClip;
+                    audio.clip = playerDeathClip;
 
-        audioSource[0].Play();
+                    animator.SetTrigger(DieHash);
+                }
+
+                audio.Play();
+            });
+
+        });
+        
     }
 }

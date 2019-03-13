@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyDeathSystem : ComponentSystem
 {
-    private ComponentGroup enemyGroup;
+    private ComponentGroup group;
 
     private int score;
     
@@ -11,37 +11,33 @@ public class EnemyDeathSystem : ComponentSystem
 
     protected override void OnCreateManager()
     {
-        enemyGroup = GetComponentGroup(
+        group = GetComponentGroup(
             ComponentType.ReadOnly<EnemyData>(),
             ComponentType.ReadOnly<DeadData>(),
-            ComponentType.Create<CapsuleCollider>(),
-            ComponentType.Create<Animator>(),
-            ComponentType.Create<AudioSource>());
+            ComponentType.ReadOnly<CapsuleCollider>(),
+            ComponentType.ReadOnly<Animator>(),
+            ComponentType.ReadOnly<AudioSource>());
     }
 
     protected override void OnUpdate()
     {
-        var puc = PostUpdateCommands;
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
         var scorePerDeath = SurvivalShooterBootstrap.Settings.ScorePerDeath;
 
-        var entity = enemyGroup.GetEntityArray();
-        var collider = enemyGroup.GetComponentArray<CapsuleCollider>();
-        var animator = enemyGroup.GetComponentArray<Animator>();
-        var audioSource = enemyGroup.GetComponentArray<AudioSource>();
-        for (var i = 0; i < entity.Length; i++)
-        {
-            collider[i].isTrigger = true;
+        Entities.With(group).ForEach(
+            (Entity entity, CapsuleCollider collider, Animator animator, AudioSource audio) =>
+            {
+                collider.isTrigger = true;
 
-            animator[i].SetTrigger(DeadHash);
+                animator.SetTrigger(DeadHash);
 
-            audioSource[i].clip = SurvivalShooterBootstrap.Settings.EnemyDeathClip;
-            audioSource[i].Play();
+                audio.clip = SurvivalShooterBootstrap.Settings.EnemyDeathClip;
+                audio.Play();
 
-            puc.RemoveComponent<DeadData>(entity[i]);
+                PostUpdateCommands.RemoveComponent<DeadData>(entity);
 
-            score += scorePerDeath;
-            gameUi.OnEnemyKilled(score);
-        }
+                score += scorePerDeath;
+                gameUi.OnEnemyKilled(score);
+            });
     }
 }

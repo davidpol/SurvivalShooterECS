@@ -4,10 +4,12 @@ using Unity.Jobs;
 
 public class PlayerHealthSystem : JobComponentSystem
 {
+    private EndSimulationEntityCommandBufferSystem barrier;
     private EntityArchetype healthUpdatedArchetype;
-    
+
     protected override void OnCreateManager()
     {
+        barrier = World.GetOrCreateManager<EndSimulationEntityCommandBufferSystem>();
         healthUpdatedArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedData));
     }
 
@@ -34,15 +36,6 @@ public class PlayerHealthSystem : JobComponentSystem
         }
     }
     
-#pragma warning disable 649
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private class SystemBarrier : BarrierSystem
-    {
-    }
-    
-    [Inject] private SystemBarrier barrier;
-#pragma warning restore 649
-    
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new PlayerHealthJob
@@ -53,6 +46,7 @@ public class PlayerHealthSystem : JobComponentSystem
         };
         inputDeps = job.Schedule(this, inputDeps);
         inputDeps.Complete();
+        barrier.AddJobHandleForProducer(inputDeps);
         return inputDeps;
     }
 }

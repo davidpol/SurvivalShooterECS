@@ -3,15 +3,15 @@ using UnityEngine;
 
 public class PlayerMovementSystem : ComponentSystem
 {
-    private ComponentGroup inputGroup;
+    private ComponentGroup group;
 
     protected override void OnCreateManager()
     {
-        inputGroup = GetComponentGroup(
-            ComponentType.Create<Transform>(),
+        group = GetComponentGroup(
+            ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerInputData>(),
-            ComponentType.Create<Rigidbody>(),
-            ComponentType.Subtractive<DeadData>());
+            ComponentType.ReadOnly<Rigidbody>(),
+            ComponentType.Exclude<DeadData>());
     }
 
     protected override void OnUpdate()
@@ -19,19 +19,18 @@ public class PlayerMovementSystem : ComponentSystem
         var speed = SurvivalShooterBootstrap.Settings.PlayerMoveSpeed;
         var dt = Time.deltaTime;
 
-        var go = inputGroup.GetGameObjectArray();
-        var input = inputGroup.GetComponentDataArray<PlayerInputData>();
-        var rigidbody = inputGroup.GetComponentArray<Rigidbody>();
-        for (var i = 0; i < go.Length; i++)
-        {
-            var move = input[i].Move;
+        Entities.With(group).ForEach(
+            (Entity entity, Rigidbody rigidBody, ref PlayerInputData input) =>
+            {
+                var move = input.Move;
 
-            var movement = new Vector3(move.x, 0, move.y);
-            movement = movement.normalized * speed * dt;
+                var movement = new Vector3(move.x, 0, move.y);
+                movement = movement.normalized * speed * dt;
 
-            var position = go[i].transform.position;
-            var newPos = new Vector3(position.x, position.y, position.z) + movement;
-            rigidbody[i].MovePosition(newPos);
-        }
+                var go = rigidBody.gameObject;
+                var position = go.transform.position;
+                var newPos = new Vector3(position.x, position.y, position.z) + movement;
+                rigidBody.MovePosition(newPos);
+            });
     }
 }
