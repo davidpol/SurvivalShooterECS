@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class PlayerHitFxSystem : ComponentSystem
 {
-    private ComponentGroup hpUpdatedGroup;
-    private ComponentGroup playerGroup;
+    private EntityQuery hpUpdatedQuery;
+    private EntityQuery playerQuery;
     
     private static readonly int DieHash = Animator.StringToHash("Die");
 
     protected override void OnCreateManager()
     {
-        hpUpdatedGroup = EntityManager.CreateComponentGroup(
+        hpUpdatedQuery = GetEntityQuery(
             ComponentType.ReadOnly<HealthUpdatedData>());
-        playerGroup = EntityManager.CreateComponentGroup(
+        playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<Animator>(),
             ComponentType.ReadOnly<AudioSource>()
@@ -23,13 +23,13 @@ public class PlayerHitFxSystem : ComponentSystem
     {
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
         
-        Entities.With(hpUpdatedGroup).ForEach((Entity entity, ref HealthUpdatedData hp) =>
+        Entities.With(hpUpdatedQuery).ForEach((Entity entity, ref HealthUpdatedData hp) =>
         {
             PostUpdateCommands.DestroyEntity(entity);
             gameUi.OnPlayerTookDamage(hp.Health);
 
             var health = hp.Health;
-            Entities.With(playerGroup).ForEach((AudioSource audio, Animator animator) =>
+            Entities.With(playerQuery).ForEach((AudioSource audio, Animator animator) =>
             {
                 if (health <= 0)
                 {

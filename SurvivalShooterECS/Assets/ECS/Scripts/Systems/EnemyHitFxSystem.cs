@@ -4,11 +4,11 @@ using UnityEngine;
 [UpdateBefore(typeof(EnemyHealthSystem))]
 public class EnemyHitFxSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
     
     protected override void OnCreateManager()
     {
-        group = EntityManager.CreateComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<EnemyData>(),
             ComponentType.ReadOnly<DamagedData>(),
@@ -17,7 +17,7 @@ public class EnemyHitFxSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        Entities.With(group).ForEach(
+        Entities.With(query).ForEach(
             (Entity entity, AudioSource audio, ref DamagedData damagedData) =>
             {
                 audio.Play();

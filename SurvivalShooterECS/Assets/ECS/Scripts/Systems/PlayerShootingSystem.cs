@@ -4,28 +4,28 @@ using UnityEngine;
 
 public class PlayerShootingSystem : ComponentSystem
 {
-    private ComponentGroup gunGroup;
-    private ComponentGroup playerGroup;
+    private EntityQuery gunQuery;
+    private EntityQuery playerQuery;
 
     private float timer;
 
     protected override void OnCreateManager()
     {
-        gunGroup = GetComponentGroup(
+        gunQuery = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerGunData>(),
             ComponentType.ReadOnly<ParticleSystem>(),
             ComponentType.ReadOnly<LineRenderer>(),
             ComponentType.ReadOnly<AudioSource>(),
             ComponentType.ReadOnly<Light>());
-        playerGroup = GetComponentGroup(
+        playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()
     {
-        var hp = playerGroup.ToComponentDataArray<HealthData>(Allocator.TempJob);
+        var hp = playerQuery.ToComponentDataArray<HealthData>(Allocator.TempJob);
         if (hp.Length == 0)
         {
             hp.Dispose();
@@ -45,7 +45,7 @@ public class PlayerShootingSystem : ComponentSystem
         var timeBetweenBullets = SurvivalShooterBootstrap.Settings.TimeBetweenBullets;
         var effectsDisplayTime = SurvivalShooterBootstrap.Settings.GunEffectsDisplayTime;
 
-        Entities.With(gunGroup).ForEach(
+        Entities.With(gunQuery).ForEach(
             (Entity entity, AudioSource audio, Light light, ParticleSystem particles, LineRenderer line) =>
             {
                 if (Input.GetButton("Fire1") && timer > timeBetweenBullets)
@@ -86,7 +86,7 @@ public class PlayerShootingSystem : ComponentSystem
             if (goEntity != null)
             {
                 var hitEntity = shootHit.collider.gameObject.GetComponent<GameObjectEntity>().Entity;
-                var entityManager = World.GetExistingManager<EntityManager>();
+                var entityManager = World.EntityManager;
                 if (!entityManager.HasComponent<DamagedData>(hitEntity))
                     PostUpdateCommands.AddComponent(hitEntity, new DamagedData
                     {

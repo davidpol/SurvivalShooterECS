@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class PlayerInputSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
 
     protected override void OnCreateManager()
     {
-        group = GetComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<PlayerInputData>(),
             ComponentType.Exclude<DeadData>());
     }
 
     protected override void OnUpdate()
     {
-        Entities.With(group).ForEach(entity =>
+        Entities.With(query).ForEach(entity =>
         {
             var newInput = new PlayerInputData
             {

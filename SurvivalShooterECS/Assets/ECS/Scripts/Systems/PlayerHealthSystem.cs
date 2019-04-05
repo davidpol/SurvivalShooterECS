@@ -9,11 +9,11 @@ public class PlayerHealthSystem : JobComponentSystem
 
     protected override void OnCreateManager()
     {
-        barrier = World.GetOrCreateManager<EndSimulationEntityCommandBufferSystem>();
+        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         healthUpdatedArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedData));
     }
 
-    private struct PlayerHealthJob : IJobProcessComponentDataWithEntity<PlayerData, HealthData, DamagedData>
+    private struct PlayerHealthJob : IJobForEachWithEntity<PlayerData, HealthData, DamagedData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
 

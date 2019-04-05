@@ -1,9 +1,8 @@
 {
   "dependencies": {
     "com.unity.collab-proxy": "1.2.16",
-    "com.unity.entities": "0.0.12-preview.29",
+    "com.unity.entities": "0.0.12-preview.30",
     "com.unity.package-manager-ui": "2.1.2",
-    "com.unity.physics": "0.0.1-preview.1",
     "com.unity.textmeshpro": "2.0.0",
     "com.unity.timeline": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.0.2",

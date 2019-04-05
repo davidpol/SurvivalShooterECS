@@ -11,7 +11,7 @@ public sealed class SurvivalShooterBootstrap
     {
         var player = Object.Instantiate(Settings.PlayerPrefab);
         var entity = player.GetComponent<GameObjectEntity>().Entity;
-        var entityManager = World.Active.GetExistingManager<EntityManager>();
+        var entityManager = World.Active.EntityManager;
         entityManager.AddComponentData(entity, new PlayerData());
         entityManager.AddComponentData(entity, new HealthData { Value = Settings.StartingPlayerHealth });
         entityManager.AddComponentData(entity, new PlayerInputData { Move = new float2(0, 0) });

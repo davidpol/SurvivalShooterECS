@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class CameraFollowSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
     
     private bool firstFrame = true;
     private Vector3 offset;
 
     protected override void OnCreateManager()
     {
-        group = GetComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerInputData>());
     }
@@ -21,7 +21,7 @@ public class CameraFollowSystem : ComponentSystem
         if (mainCamera == null)
             return;
         
-        Entities.With(group).ForEach(
+        Entities.With(query).ForEach(
             (Entity entity, Transform transform, ref PlayerInputData data) =>
             {
                 var go = transform.gameObject;

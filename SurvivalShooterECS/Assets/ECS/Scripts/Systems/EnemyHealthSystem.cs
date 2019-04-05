@@ -8,10 +8,10 @@ public class EnemyHealthSystem : JobComponentSystem
 
     protected override void OnCreateManager()
     {
-        barrier = World.GetOrCreateManager<EndSimulationEntityCommandBufferSystem>();
+        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
-    private struct EnemyHealthJob : IJobProcessComponentDataWithEntity<EnemyData, HealthData, DamagedData>
+    private struct EnemyHealthJob : IJobForEachWithEntity<EnemyData, HealthData, DamagedData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
         

@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class EnemySpawnSystem : ComponentSystem
 {
-    private ComponentGroup spawnerGroup;
-    private ComponentGroup playerGroup;
+    private EntityQuery spawnerQuery;
+    private EntityQuery playerQuery;
 
     private readonly List<float> time = new List<float>();
 
     protected override void OnCreateManager()
     {
-        spawnerGroup = GetComponentGroup(
+        spawnerQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemySpawner>());
-        playerGroup = GetComponentGroup(
+        playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
     }
@@ -24,7 +24,7 @@ public class EnemySpawnSystem : ComponentSystem
         GameObject player = null;
         var playerHp = 0;
 
-        Entities.With(playerGroup).ForEach(
+        Entities.With(playerQuery).ForEach(
             (Entity entity, Transform transform, ref HealthData hp) =>
             {
                 player = transform.gameObject;
@@ -37,7 +37,7 @@ public class EnemySpawnSystem : ComponentSystem
         var dt = Time.deltaTime;
         var startingHealth = SurvivalShooterBootstrap.Settings.StartingEnemyHealth;
 
-        var spawner = spawnerGroup.ToComponentArray<EnemySpawner>();
+        var spawner = spawnerQuery.ToComponentArray<EnemySpawner>();
         for (var i = 0; i < spawner.Length; i++)
         {
             if (time.Count < i + 1)

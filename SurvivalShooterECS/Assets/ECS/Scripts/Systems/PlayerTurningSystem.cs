@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class PlayerTurningSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
 
     protected override void OnCreateManager()
     {
-        group = GetComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<Rigidbody>(),
@@ -25,7 +25,7 @@ public class PlayerTurningSystem : ComponentSystem
         var camRayLen = SurvivalShooterBootstrap.Settings.CamRayLen;
         var floor = LayerMask.GetMask("Floor");
 
-        Entities.With(group).ForEach((Entity entity, Rigidbody rigidBody) =>
+        Entities.With(query).ForEach((Entity entity, Rigidbody rigidBody) =>
         {
             var camRay = mainCamera.ScreenPointToRay(mousePos);
             RaycastHit floorHit;

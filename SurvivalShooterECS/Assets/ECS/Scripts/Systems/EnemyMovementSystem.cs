@@ -4,17 +4,17 @@ using UnityEngine.AI;
 
 public class EnemyMovementSystem : ComponentSystem
 { 
-    private ComponentGroup enemyGroup;
-    private ComponentGroup playerGroup;
+    private EntityQuery enemyQuery;
+    private EntityQuery playerQuery;
 
     protected override void OnCreateManager()
     {
-        enemyGroup = GetComponentGroup(
+        enemyQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemyData>(),
             ComponentType.ReadOnly<HealthData>(),
             ComponentType.ReadOnly<NavMeshAgent>(),
             ComponentType.Exclude<DeadData>());
-        playerGroup = GetComponentGroup(
+        playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
@@ -25,7 +25,7 @@ public class EnemyMovementSystem : ComponentSystem
         GameObject player = null;
         var playerHp = 0;
 
-        Entities.With(playerGroup).ForEach(
+        Entities.With(playerQuery).ForEach(
             (Entity entity, Transform transform, ref HealthData hp) =>
             {
                 player = transform.gameObject;
@@ -35,7 +35,7 @@ public class EnemyMovementSystem : ComponentSystem
         if (player == null)
             return;
 
-        Entities.With(enemyGroup).ForEach(
+        Entities.With(enemyQuery).ForEach(
             (Entity entity, NavMeshAgent agent, ref HealthData hp) =>
             {
                 if (hp.Value > 0 && playerHp > 0)

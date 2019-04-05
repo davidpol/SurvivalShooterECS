@@ -3,20 +3,20 @@ using UnityEngine;
 
 public class PlayerAnimationSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
     
     private static readonly int IsWalkingHash = Animator.StringToHash("IsWalking");
 
     protected override void OnCreateManager()
     {
-        group = GetComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<PlayerInputData>(),
             ComponentType.ReadOnly<Animator>());
     }
 
     protected override void OnUpdate()
     {
-        Entities.With(group).ForEach(
+        Entities.With(query).ForEach(
             (Entity entity, Animator animator, ref PlayerInputData input) =>
             {
                 var move = input.Move;

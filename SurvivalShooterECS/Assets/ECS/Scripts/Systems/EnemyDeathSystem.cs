@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyDeathSystem : ComponentSystem
 {
-    private ComponentGroup group;
+    private EntityQuery query;
 
     private int score;
     
@@ -11,7 +11,7 @@ public class EnemyDeathSystem : ComponentSystem
 
     protected override void OnCreateManager()
     {
-        group = GetComponentGroup(
+        query = GetEntityQuery(
             ComponentType.ReadOnly<EnemyData>(),
             ComponentType.ReadOnly<DeadData>(),
             ComponentType.ReadOnly<CapsuleCollider>(),
@@ -24,7 +24,7 @@ public class EnemyDeathSystem : ComponentSystem
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
         var scorePerDeath = SurvivalShooterBootstrap.Settings.ScorePerDeath;
 
-        Entities.With(group).ForEach(
+        Entities.With(query).ForEach(
             (Entity entity, CapsuleCollider collider, Animator animator, AudioSource audio) =>
             {
                 collider.isTrigger = true;
