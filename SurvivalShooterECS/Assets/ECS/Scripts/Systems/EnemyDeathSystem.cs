@@ -9,7 +9,7 @@ public class EnemyDeathSystem : ComponentSystem
     
     private static readonly int DeadHash = Animator.StringToHash("Dead");
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         query = GetEntityQuery(
             ComponentType.ReadOnly<EnemyData>(),

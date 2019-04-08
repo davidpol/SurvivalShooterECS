@@ -8,7 +8,7 @@ public class PlayerHitFxSystem : ComponentSystem
     
     private static readonly int DieHash = Animator.StringToHash("Die");
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         hpUpdatedQuery = GetEntityQuery(
             ComponentType.ReadOnly<HealthUpdatedData>());

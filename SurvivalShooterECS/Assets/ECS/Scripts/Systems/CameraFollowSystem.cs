@@ -8,7 +8,7 @@ public class CameraFollowSystem : ComponentSystem
     private bool firstFrame = true;
     private Vector3 offset;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),

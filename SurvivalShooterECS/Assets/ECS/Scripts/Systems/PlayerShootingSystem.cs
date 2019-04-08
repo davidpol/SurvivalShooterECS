@@ -9,7 +9,7 @@ public class PlayerShootingSystem : ComponentSystem
 
     private float timer;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         gunQuery = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),

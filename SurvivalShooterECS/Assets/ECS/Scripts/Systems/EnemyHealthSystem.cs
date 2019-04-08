@@ -6,7 +6,7 @@ public class EnemyHealthSystem : JobComponentSystem
 {
     private EndSimulationEntityCommandBufferSystem barrier;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }

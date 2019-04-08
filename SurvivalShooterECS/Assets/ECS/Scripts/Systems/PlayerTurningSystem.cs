@@ -5,7 +5,7 @@ public class PlayerTurningSystem : ComponentSystem
 {
     private EntityQuery query;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),

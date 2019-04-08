@@ -7,7 +7,7 @@ public class PlayerAnimationSystem : ComponentSystem
     
     private static readonly int IsWalkingHash = Animator.StringToHash("IsWalking");
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         query = GetEntityQuery(
             ComponentType.ReadOnly<PlayerInputData>(),

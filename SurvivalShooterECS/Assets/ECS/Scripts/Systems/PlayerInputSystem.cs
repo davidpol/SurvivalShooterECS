@@ -6,7 +6,7 @@ public class PlayerInputSystem : ComponentSystem
 {
     private EntityQuery query;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         query = GetEntityQuery(
             ComponentType.ReadOnly<PlayerInputData>(),

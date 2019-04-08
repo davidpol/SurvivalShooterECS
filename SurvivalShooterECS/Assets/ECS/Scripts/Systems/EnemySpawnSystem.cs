@@ -10,7 +10,7 @@ public class EnemySpawnSystem : ComponentSystem
 
     private readonly List<float> time = new List<float>();
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         spawnerQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemySpawner>());

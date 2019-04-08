@@ -7,7 +7,7 @@ public class EnemyMovementSystem : ComponentSystem
     private EntityQuery enemyQuery;
     private EntityQuery playerQuery;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         enemyQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemyData>(),

@@ -7,7 +7,7 @@ public class PlayerHealthSystem : JobComponentSystem
     private EndSimulationEntityCommandBufferSystem barrier;
     private EntityArchetype healthUpdatedArchetype;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
         barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         healthUpdatedArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedData));
