@@ -1,7 +1,8 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
+using UnitySampleAssets.CrossPlatformInput;
 
+[DisableAutoCreation]
 public class PlayerInputSystem : ComponentSystem
 {
     private EntityQuery query;
@@ -19,7 +20,7 @@ public class PlayerInputSystem : ComponentSystem
         {
             var newInput = new PlayerInputData
             {
-                Move = new float2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"))
+                Move = new float2(CrossPlatformInputManager.GetAxisRaw("Horizontal"), CrossPlatformInputManager.GetAxisRaw("Vertical"))
             };
             PostUpdateCommands.SetComponent(entity, newInput);
         });

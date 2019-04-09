@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
+[DisableAutoCreation]
 public class CameraFollowSystem : ComponentSystem
 {
     private EntityQuery query;

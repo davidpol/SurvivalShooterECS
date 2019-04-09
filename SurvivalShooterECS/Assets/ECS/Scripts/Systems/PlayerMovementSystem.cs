@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
+[DisableAutoCreation]
 public class PlayerMovementSystem : ComponentSystem
 {
     private EntityQuery query;
