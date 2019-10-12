@@ -1,28 +1,38 @@
 ﻿using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnitySampleAssets.CrossPlatformInput;
 
 [DisableAutoCreation]
-public class PlayerInputSystem : ComponentSystem
+public class PlayerInputSystem : JobComponentSystem
 {
-    private EntityQuery query;
+    private EndSimulationEntityCommandBufferSystem barrier;
 
     protected override void OnCreate()
     {
-        query = GetEntityQuery(
-            ComponentType.ReadOnly<PlayerInputData>(),
-            ComponentType.Exclude<DeadData>());
+        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
-    protected override void OnUpdate()
+    private struct EnemyAttackJob : IJobForEachWithEntity<PlayerInputData>
     {
-        Entities.With(query).ForEach(entity =>
+        public float2 InputData;
+
+        public void Execute(Entity entity, int index, ref PlayerInputData inputData)
         {
-            var newInput = new PlayerInputData
-            {
-                Move = new float2(CrossPlatformInputManager.GetAxisRaw("Horizontal"), CrossPlatformInputManager.GetAxisRaw("Vertical"))
-            };
-            PostUpdateCommands.SetComponent(entity, newInput);
-        });
+            inputData.Move = InputData;
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        var job = new EnemyAttackJob
+        {
+            InputData = new float2(
+                CrossPlatformInputManager.GetAxisRaw("Horizontal"),
+                CrossPlatformInputManager.GetAxisRaw("Vertical"))
+        };
+        inputDeps = job.Schedule(this, inputDeps);
+        barrier.AddJobHandleForProducer(inputDeps);
+        return inputDeps;
     }
 }
