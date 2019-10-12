@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnitySampleAssets.CrossPlatformInput;
@@ -13,6 +14,7 @@ public class PlayerInputSystem : JobComponentSystem
         barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     private struct EnemyAttackJob : IJobForEachWithEntity<PlayerInputData>
     {
         public float2 InputData;
