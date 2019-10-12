@@ -3,37 +3,46 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-public class EnemyAttackingSystem : JobComponentSystem
+public class EnemyAttackSystem : JobComponentSystem
 {
+    private EntityArchetype healthUpdatedEvtArchetype;
     private EndSimulationEntityCommandBufferSystem barrier;
 
     protected override void OnCreate()
     {
+        healthUpdatedEvtArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedData));
         barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     private struct EnemyAttackJob : IJobForEachWithEntity<EnemyAttackData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
-        
+
         public float DeltaTime;
+        public EntityArchetype HealthUpdatedArchetype;
 
         [ReadOnly] public ComponentDataFromEntity<HealthData> Health;
-        [ReadOnly] public ComponentDataFromEntity<DamagedData> Damaged;
-        
+
         public void Execute(Entity entity, int index, ref EnemyAttackData attackData)
         {
             attackData.Timer += DeltaTime;
 
+            var attacker = attackData.Source;
+            var target = attackData.Target;
             if (attackData.Timer >= attackData.Frequency &&
-                Health.Exists(attackData.Source) &&
-                Health[attackData.Source].Value > 0)
+                Health[attacker].Value > 0 &&
+                Health[target].Value > 0)
             {
                 attackData.Timer = 0f;
 
-                var target = attackData.Target;
-                if (Health[target].Value > 0 && !Damaged.Exists(target))
-                    Ecb.AddComponent(index, target, new DamagedData { Damage = attackData.Damage });
+                var newHp = Health[target].Value - attackData.Damage;
+                Ecb.SetComponent(index, target, new HealthData { Value = newHp });
+
+                var evt = Ecb.CreateEntity(index, HealthUpdatedArchetype);
+                Ecb.SetComponent(index, evt, new HealthUpdatedData { Health = newHp });
+
+                if (newHp <= 0)
+                    Ecb.AddComponent(index, target, new DeadData());
             }
         }
     }
@@ -44,12 +53,10 @@ public class EnemyAttackingSystem : JobComponentSystem
         {
             Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
             DeltaTime = Time.deltaTime,
-            Health = GetComponentDataFromEntity<HealthData>(),
-            Damaged = GetComponentDataFromEntity<DamagedData>()
-            
+            HealthUpdatedArchetype = healthUpdatedEvtArchetype,
+            Health = GetComponentDataFromEntity<HealthData>()
         };
         inputDeps = job.Schedule(this, inputDeps);
-        inputDeps.Complete();
         barrier.AddJobHandleForProducer(inputDeps);
         return inputDeps;
     }

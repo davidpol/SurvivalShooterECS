@@ -5,7 +5,7 @@ public class PlayerHitFxSystem : ComponentSystem
 {
     private EntityQuery hpUpdatedQuery;
     private EntityQuery playerQuery;
-    
+
     private static readonly int DieHash = Animator.StringToHash("Die");
 
     protected override void OnCreate()
@@ -22,7 +22,7 @@ public class PlayerHitFxSystem : ComponentSystem
     protected override void OnUpdate()
     {
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
-        
+
         Entities.With(hpUpdatedQuery).ForEach((Entity entity, ref HealthUpdatedData hp) =>
         {
             PostUpdateCommands.DestroyEntity(entity);
@@ -43,6 +43,6 @@ public class PlayerHitFxSystem : ComponentSystem
             });
 
         });
-        
+
     }
 }
