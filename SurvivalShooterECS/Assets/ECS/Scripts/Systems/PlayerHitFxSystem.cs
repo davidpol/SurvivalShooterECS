@@ -11,7 +11,7 @@ public class PlayerHitFxSystem : ComponentSystem
     protected override void OnCreate()
     {
         hpUpdatedQuery = GetEntityQuery(
-            ComponentType.ReadOnly<HealthUpdatedData>());
+            ComponentType.ReadOnly<HealthUpdatedEvent>());
         playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<Animator>(),
@@ -23,7 +23,7 @@ public class PlayerHitFxSystem : ComponentSystem
     {
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
 
-        Entities.With(hpUpdatedQuery).ForEach((Entity entity, ref HealthUpdatedData hp) =>
+        Entities.With(hpUpdatedQuery).ForEach((Entity entity, ref HealthUpdatedEvent hp) =>
         {
             PostUpdateCommands.DestroyEntity(entity);
             gameUi.OnPlayerTookDamage(hp.Health);

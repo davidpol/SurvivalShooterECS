@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-public struct HealthUpdatedData : IComponentData
+public struct HealthUpdatedEvent : IComponentData
 {
     public int Health;
 }

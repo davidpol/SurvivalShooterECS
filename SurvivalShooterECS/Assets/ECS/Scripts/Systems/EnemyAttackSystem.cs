@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class EnemyAttackSystem : JobComponentSystem
 {
-    private EntityArchetype healthUpdatedEvtArchetype;
+    private EntityArchetype healthUpdatedEventArchetype;
     private EndSimulationEntityCommandBufferSystem barrier;
 
     protected override void OnCreate()
     {
-        healthUpdatedEvtArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedData));
+        healthUpdatedEventArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedEvent));
         barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
@@ -39,7 +39,7 @@ public class EnemyAttackSystem : JobComponentSystem
                 Ecb.SetComponent(index, target, new HealthData { Value = newHp });
 
                 var evt = Ecb.CreateEntity(index, HealthUpdatedArchetype);
-                Ecb.SetComponent(index, evt, new HealthUpdatedData { Health = newHp });
+                Ecb.SetComponent(index, evt, new HealthUpdatedEvent { Health = newHp });
 
                 if (newHp <= 0)
                     Ecb.AddComponent(index, target, new DeadData());
@@ -53,7 +53,7 @@ public class EnemyAttackSystem : JobComponentSystem
         {
             Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
             DeltaTime = Time.deltaTime,
-            HealthUpdatedArchetype = healthUpdatedEvtArchetype,
+            HealthUpdatedArchetype = healthUpdatedEventArchetype,
             Health = GetComponentDataFromEntity<HealthData>()
         };
         inputDeps = job.Schedule(this, inputDeps);
