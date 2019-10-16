@@ -11,6 +11,7 @@ public class PlayerTurningSystem : ComponentSystem
         query = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerData>(),
+            ComponentType.ReadOnly<PlayerInputData>(),
             ComponentType.ReadOnly<Rigidbody>(),
             ComponentType.Exclude<DeadData>());
     }
@@ -20,14 +21,13 @@ public class PlayerTurningSystem : ComponentSystem
         var mainCamera = Camera.main;
         if (mainCamera == null)
             return;
-        
-        var mousePos = Input.mousePosition;
 
         var camRayLen = SurvivalShooterBootstrap.Settings.CamRayLen;
         var floor = LayerMask.GetMask("Floor");
 
-        Entities.With(query).ForEach((Entity entity, Rigidbody rigidBody) =>
+        Entities.With(query).ForEach((Entity entity, ref PlayerInputData input, Rigidbody rigidBody) =>
         {
+            var mousePos = new Vector3(input.Look.x, input.Look.y, 0);
             var camRay = mainCamera.ScreenPointToRay(mousePos);
             RaycastHit floorHit;
             if (Physics.Raycast(camRay, out floorHit, camRayLen, floor))

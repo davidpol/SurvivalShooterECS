@@ -1,5 +1,4 @@
-﻿using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 
 public class PlayerShootingSystem : ComponentSystem
@@ -20,25 +19,26 @@ public class PlayerShootingSystem : ComponentSystem
             ComponentType.ReadOnly<Light>());
         playerQuery = GetEntityQuery(
             ComponentType.ReadOnly<PlayerData>(),
+            ComponentType.ReadOnly<PlayerInputData>(),
             ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()
     {
-        var hp = playerQuery.ToComponentDataArray<HealthData>(Allocator.TempJob);
-        if (hp.Length == 0)
-        {
-            hp.Dispose();
-            return;
-        }
+        var hasToExit = true;
+        var playerShot = false;
+        Entities.With(playerQuery).ForEach(
+            (Entity entity, ref HealthData health, ref PlayerInputData input) =>
+            {
+                if (health.Value > 0)
+                    hasToExit = false;
 
-        if (hp[0].Value <= 0)
-        {
-            hp.Dispose();
+                if (input.Shoot > 0.0f)
+                    playerShot = true;
+            });
+
+        if (hasToExit)
             return;
-        }
-        
-        hp.Dispose();
 
         timer += Time.deltaTime;
 
@@ -48,7 +48,7 @@ public class PlayerShootingSystem : ComponentSystem
         Entities.With(gunQuery).ForEach(
             (Entity entity, AudioSource audio, Light light, ParticleSystem particles, LineRenderer line) =>
             {
-                if (Input.GetButton("Fire1") && timer > timeBetweenBullets)
+                if (playerShot && timer > timeBetweenBullets)
                     Shoot(audio, light, particles, line);
 
                 if (timer >= timeBetweenBullets * effectsDisplayTime)
