@@ -1,6 +1,4 @@
-﻿using Unity.Entities;
-using Unity.Mathematics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Assertions;
 
 public sealed class SurvivalShooterBootstrap
@@ -10,12 +8,8 @@ public sealed class SurvivalShooterBootstrap
     public static void NewGame()
     {
         var player = Object.Instantiate(Settings.PlayerPrefab);
-        var entity = player.GetComponent<GameObjectEntity>().Entity;
-        var entityManager = World.Active.EntityManager;
-        entityManager.AddComponentData(entity, new PlayerData());
-        entityManager.AddComponentData(entity, new HealthData { Value = Settings.StartingPlayerHealth });
-        entityManager.AddComponentData(entity, new PlayerInputData { Move = new float2(0, 0) });
-
+        var gun = Object.Instantiate(Settings.GunPrefab);
+        gun.transform.SetParent(player.GetComponent<PlayerObject>().GunPivot, false);
         Settings.GameUi = GameObject.Find("GameUi").GetComponent<GameUi>();
     }
 
@@ -23,7 +17,8 @@ public sealed class SurvivalShooterBootstrap
     public static void InitializeWithScene()
     {
         var settingsGo = GameObject.Find("Settings");
-        Settings = settingsGo?.GetComponent<SurvivalShooterSettings>();
+        if (settingsGo != null)
+            Settings = settingsGo.GetComponent<SurvivalShooterSettings>();
         Assert.IsNotNull(Settings);
     }
 }

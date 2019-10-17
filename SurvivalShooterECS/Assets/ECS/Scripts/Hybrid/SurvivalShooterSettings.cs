@@ -3,6 +3,7 @@
 public class SurvivalShooterSettings : MonoBehaviour
 {
     public GameObject PlayerPrefab;
+    public GameObject GunPrefab;
     public AudioClip PlayerDeathClip;
     public AudioClip EnemyDeathClip;
 

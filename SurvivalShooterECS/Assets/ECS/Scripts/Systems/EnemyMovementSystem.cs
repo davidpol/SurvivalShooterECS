@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyMovementSystem : ComponentSystem
-{ 
+{
     private EntityQuery enemyQuery;
     private EntityQuery playerQuery;
 

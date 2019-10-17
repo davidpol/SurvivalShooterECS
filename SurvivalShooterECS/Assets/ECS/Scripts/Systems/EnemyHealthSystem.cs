@@ -14,9 +14,9 @@ public class EnemyHealthSystem : JobComponentSystem
     private struct EnemyHealthJob : IJobForEachWithEntity<EnemyData, HealthData, DamagedData>
     {
         public EntityCommandBuffer.Concurrent Ecb;
-        
+
         [ReadOnly] public ComponentDataFromEntity<DeadData> Dead;
-        
+
         public void Execute(
             Entity entity,
             int index,
@@ -30,7 +30,7 @@ public class EnemyHealthSystem : JobComponentSystem
                 Ecb.AddComponent(index, entity, new DeadData());
         }
     }
-    
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new EnemyHealthJob

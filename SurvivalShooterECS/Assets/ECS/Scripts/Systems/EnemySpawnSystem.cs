@@ -15,6 +15,7 @@ public class EnemySpawnSystem : ComponentSystem
         spawnerQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemySpawner>());
         playerQuery = GetEntityQuery(
+            ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<PlayerData>(),
             ComponentType.ReadOnly<HealthData>());
     }
@@ -35,7 +36,6 @@ public class EnemySpawnSystem : ComponentSystem
             return;
 
         var dt = Time.deltaTime;
-        var startingHealth = SurvivalShooterBootstrap.Settings.StartingEnemyHealth;
 
         var spawner = spawnerQuery.ToComponentArray<EnemySpawner>();
         for (var i = 0; i < spawner.Length; i++)
@@ -47,10 +47,7 @@ public class EnemySpawnSystem : ComponentSystem
 
             if (time[i] >= spawner[i].SpawnTime)
             {
-                var enemy = Object.Instantiate(spawner[i].Enemy, spawner[i].transform.position, quaternion.identity);
-                var entity = enemy.GetComponent<GameObjectEntity>().Entity;
-                PostUpdateCommands.AddComponent(entity, new EnemyData());
-                PostUpdateCommands.AddComponent(entity, new HealthData { Value = startingHealth });
+                Object.Instantiate(spawner[i].Enemy, spawner[i].transform.position, quaternion.identity);
                 time[i] = 0f;
             }
         }

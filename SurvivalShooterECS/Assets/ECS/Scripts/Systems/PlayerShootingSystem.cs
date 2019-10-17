@@ -82,12 +82,11 @@ public class PlayerShootingSystem : ComponentSystem
         if (Physics.Raycast(shootRay, out shootHit, SurvivalShooterBootstrap.Settings.GunRange,
             LayerMask.GetMask("Shootable")))
         {
-            var goEntity = shootHit.collider.gameObject.GetComponent<GameObjectEntity>();
-            if (goEntity != null)
+            var enemyObj = shootHit.collider.gameObject.GetComponent<EnemyObject>();
+            if (enemyObj != null)
             {
-                var hitEntity = shootHit.collider.gameObject.GetComponent<GameObjectEntity>().Entity;
-                var entityManager = World.EntityManager;
-                if (!entityManager.HasComponent<DamagedData>(hitEntity))
+                var hitEntity = enemyObj.GetComponent<EnemyObject>().Entity;
+                if (!EntityManager.HasComponent<DamagedData>(hitEntity))
                     PostUpdateCommands.AddComponent(hitEntity, new DamagedData
                     {
                         Damage = SurvivalShooterBootstrap.Settings.DamagePerShot,

@@ -6,7 +6,7 @@ public class EnemyDeathSystem : ComponentSystem
     private EntityQuery query;
 
     private int score;
-    
+
     private static readonly int DeadHash = Animator.StringToHash("Dead");
 
     protected override void OnCreate()
@@ -34,7 +34,7 @@ public class EnemyDeathSystem : ComponentSystem
                 audio.clip = SurvivalShooterBootstrap.Settings.EnemyDeathClip;
                 audio.Play();
 
-                PostUpdateCommands.RemoveComponent<DeadData>(entity);
+                EntityManager.DestroyEntity(collider.gameObject.GetComponent<EnemyObject>().Entity);
 
                 score += scorePerDeath;
                 gameUi.OnEnemyKilled(score);

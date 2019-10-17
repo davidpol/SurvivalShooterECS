@@ -41,7 +41,6 @@ public class PlayerHitFxSystem : ComponentSystem
 
                 audio.Play();
             });
-
         });
 
     }
