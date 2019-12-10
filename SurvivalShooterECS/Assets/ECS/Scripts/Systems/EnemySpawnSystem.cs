@@ -35,7 +35,7 @@ public class EnemySpawnSystem : ComponentSystem
         if (player == null || playerHp <= 0)
             return;
 
-        var dt = Time.deltaTime;
+        var dt = Time.DeltaTime;
 
         var spawner = spawnerQuery.ToComponentArray<EnemySpawner>();
         for (var i = 0; i < spawner.Length; i++)

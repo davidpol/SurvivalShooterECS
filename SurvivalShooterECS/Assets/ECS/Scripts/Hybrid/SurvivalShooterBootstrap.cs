@@ -7,9 +7,8 @@ public sealed class SurvivalShooterBootstrap
 
     public static void NewGame()
     {
-        var player = Object.Instantiate(Settings.PlayerPrefab);
-        var gun = Object.Instantiate(Settings.GunPrefab);
-        gun.transform.SetParent(player.GetComponent<PlayerObject>().GunPivot, false);
+        Object.Instantiate(Settings.PlayerPrefab);
+        Object.Instantiate(Settings.GunPrefab);
         Settings.GameUi = GameObject.Find("GameUi").GetComponent<GameUi>();
     }
 

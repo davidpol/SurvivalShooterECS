@@ -40,7 +40,7 @@ public class PlayerShootingSystem : ComponentSystem
         if (hasToExit)
             return;
 
-        timer += Time.deltaTime;
+        timer += Time.DeltaTime;
 
         var timeBetweenBullets = SurvivalShooterBootstrap.Settings.TimeBetweenBullets;
         var effectsDisplayTime = SurvivalShooterBootstrap.Settings.GunEffectsDisplayTime;

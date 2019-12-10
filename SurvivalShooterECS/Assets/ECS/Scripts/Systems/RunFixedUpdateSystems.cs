@@ -8,14 +8,15 @@ public class RunFixedUpdateSystems : MonoBehaviour
     private PlayerTurningSystem playerTurningSystem;
     private PlayerAnimationSystem playerAnimationSystem;
     private CameraFollowSystem cameraFollowSystem;
-    
+
     private void Start()
     {
-        playerInputSystem = World.Active.GetOrCreateSystem<PlayerInputSystem>();
-        playerMovementSystem = World.Active.GetOrCreateSystem<PlayerMovementSystem>();
-        playerTurningSystem = World.Active.GetOrCreateSystem<PlayerTurningSystem>();
-        playerAnimationSystem = World.Active.GetOrCreateSystem<PlayerAnimationSystem>();
-        cameraFollowSystem = World.Active.GetOrCreateSystem<CameraFollowSystem>();
+        var world = World.DefaultGameObjectInjectionWorld;
+        playerInputSystem = world.GetOrCreateSystem<PlayerInputSystem>();
+        playerMovementSystem = world.GetOrCreateSystem<PlayerMovementSystem>();
+        playerTurningSystem = world.GetOrCreateSystem<PlayerTurningSystem>();
+        playerAnimationSystem = world.GetOrCreateSystem<PlayerAnimationSystem>();
+        cameraFollowSystem = world.GetOrCreateSystem<CameraFollowSystem>();
     }
 
     private void FixedUpdate()

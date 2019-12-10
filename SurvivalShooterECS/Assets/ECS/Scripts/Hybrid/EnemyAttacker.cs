@@ -11,7 +11,7 @@ public class EnemyAttacker : MonoBehaviour
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
-        entityManager = World.Active.EntityManager;
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         enemyAttackArchetype = entityManager.CreateArchetype(typeof(EnemyAttackData));
     }
 

@@ -52,7 +52,7 @@ public class EnemyAttackSystem : JobComponentSystem
         var job = new EnemyAttackJob
         {
             Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
-            DeltaTime = Time.deltaTime,
+            DeltaTime = Time.DeltaTime,
             HealthUpdatedArchetype = healthUpdatedEventArchetype,
             Health = GetComponentDataFromEntity<HealthData>()
         };
