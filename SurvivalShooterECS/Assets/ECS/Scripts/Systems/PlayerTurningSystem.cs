@@ -4,18 +4,6 @@ using UnityEngine;
 [DisableAutoCreation]
 public class PlayerTurningSystem : ComponentSystem
 {
-    private EntityQuery query;
-
-    protected override void OnCreate()
-    {
-        query = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<PlayerData>(),
-            ComponentType.ReadOnly<PlayerInputData>(),
-            ComponentType.ReadOnly<Rigidbody>(),
-            ComponentType.Exclude<DeadData>());
-    }
-
     protected override void OnUpdate()
     {
         var mainCamera = Camera.main;
@@ -25,19 +13,20 @@ public class PlayerTurningSystem : ComponentSystem
         var camRayLen = SurvivalShooterBootstrap.Settings.CamRayLen;
         var floor = LayerMask.GetMask("Floor");
 
-        Entities.With(query).ForEach((Entity entity, ref PlayerInputData input, Rigidbody rigidBody) =>
-        {
-            var mousePos = new Vector3(input.Look.x, input.Look.y, 0);
-            var camRay = mainCamera.ScreenPointToRay(mousePos);
-            RaycastHit floorHit;
-            if (Physics.Raycast(camRay, out floorHit, camRayLen, floor))
+        Entities.WithAll<PlayerData>().WithNone<DeadData>().ForEach(
+            (Entity entity, ref PlayerInputData input, Rigidbody rigidBody) =>
             {
-                var position = rigidBody.gameObject.transform.position;
-                var playerToMouse = floorHit.point - new Vector3(position.x, position.y, position.z);
-                playerToMouse.y = 0f;
-                var newRot = Quaternion.LookRotation(playerToMouse);
-                rigidBody.MoveRotation(newRot);
-            }
-        });
+                var mousePos = new Vector3(input.Look.x, input.Look.y, 0);
+                var camRay = mainCamera.ScreenPointToRay(mousePos);
+                RaycastHit floorHit;
+                if (Physics.Raycast(camRay, out floorHit, camRayLen, floor))
+                {
+                    var position = rigidBody.gameObject.transform.position;
+                    var playerToMouse = floorHit.point - new Vector3(position.x, position.y, position.z);
+                    playerToMouse.y = 0f;
+                    var newRot = Quaternion.LookRotation(playerToMouse);
+                    rigidBody.MoveRotation(newRot);
+                }
+            });
     }
 }

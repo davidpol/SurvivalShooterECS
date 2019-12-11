@@ -4,23 +4,12 @@ using UnityEngine;
 [DisableAutoCreation]
 public class PlayerMovementSystem : ComponentSystem
 {
-    private EntityQuery query;
-
-    protected override void OnCreate()
-    {
-        query = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<PlayerInputData>(),
-            ComponentType.ReadOnly<Rigidbody>(),
-            ComponentType.Exclude<DeadData>());
-    }
-
     protected override void OnUpdate()
     {
         var speed = SurvivalShooterBootstrap.Settings.PlayerMoveSpeed;
         var dt = Time.DeltaTime;
 
-        Entities.With(query).ForEach(
+        Entities.WithAll<PlayerInputData>().WithNone<DeadData>().ForEach(
             (Entity entity, Rigidbody rigidBody, ref PlayerInputData input) =>
             {
                 var move = input.Move;

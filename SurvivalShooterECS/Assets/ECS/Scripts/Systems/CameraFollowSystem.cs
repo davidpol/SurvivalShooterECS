@@ -4,41 +4,31 @@ using UnityEngine;
 [DisableAutoCreation]
 public class CameraFollowSystem : ComponentSystem
 {
-    private EntityQuery query;
-    
     private bool firstFrame = true;
     private Vector3 offset;
 
-    protected override void OnCreate()
-    {
-        query = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<PlayerInputData>());
-    }
-
     protected override void OnUpdate()
     {
-        var mainCamera = Camera.main;
-        if (mainCamera == null)
-            return;
-        
-        Entities.With(query).ForEach(
-            (Entity entity, Transform transform, ref PlayerInputData data) =>
+        Entities.ForEach((Entity entity, Transform transform, ref PlayerInputData data) =>
+        {
+            var mainCamera = Camera.main;
+            if (mainCamera == null)
+                return;
+
+            var go = transform.gameObject;
+            var playerPos = go.transform.position;
+
+            if (firstFrame)
             {
-                var go = transform.gameObject;
-                var playerPos = go.transform.position;
+                offset = mainCamera.transform.position - playerPos;
+                firstFrame = false;
+            }
 
-                if (firstFrame)
-                {
-                    offset = mainCamera.transform.position - playerPos;
-                    firstFrame = false;
-                }
-
-                var smoothing = SurvivalShooterBootstrap.Settings.CamSmoothing;
-                var dt = Time.DeltaTime;
-                var targetCamPos = playerPos + offset;
-                mainCamera.transform.position =
-                    Vector3.Lerp(mainCamera.transform.position, targetCamPos, smoothing * dt);
-            });
+            var smoothing = SurvivalShooterBootstrap.Settings.CamSmoothing;
+            var dt = Time.DeltaTime;
+            var targetCamPos = playerPos + offset;
+            mainCamera.transform.position =
+                Vector3.Lerp(mainCamera.transform.position, targetCamPos, smoothing * dt);
+        });
     }
 }

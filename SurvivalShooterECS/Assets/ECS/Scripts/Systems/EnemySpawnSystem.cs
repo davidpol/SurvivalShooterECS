@@ -6,7 +6,6 @@ using UnityEngine;
 public class EnemySpawnSystem : ComponentSystem
 {
     private EntityQuery spawnerQuery;
-    private EntityQuery playerQuery;
 
     private readonly List<float> time = new List<float>();
 
@@ -14,10 +13,6 @@ public class EnemySpawnSystem : ComponentSystem
     {
         spawnerQuery = GetEntityQuery(
             ComponentType.ReadOnly<EnemySpawner>());
-        playerQuery = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<PlayerData>(),
-            ComponentType.ReadOnly<HealthData>());
     }
 
     protected override void OnUpdate()
@@ -25,7 +20,7 @@ public class EnemySpawnSystem : ComponentSystem
         GameObject player = null;
         var playerHp = 0;
 
-        Entities.With(playerQuery).ForEach(
+        Entities.WithAll<PlayerData>().ForEach(
             (Entity entity, Transform transform, ref HealthData hp) =>
             {
                 player = transform.gameObject;
