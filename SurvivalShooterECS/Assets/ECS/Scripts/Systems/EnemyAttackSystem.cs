@@ -1,62 +1,51 @@
-﻿using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 
 public class EnemyAttackSystem : JobComponentSystem
 {
+    private EndSimulationEntityCommandBufferSystem ecbSystem;
     private EntityArchetype healthUpdatedEventArchetype;
-    private EndSimulationEntityCommandBufferSystem barrier;
 
     protected override void OnCreate()
     {
+        ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         healthUpdatedEventArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedEvent));
-        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-    }
-
-    private struct EnemyAttackJob : IJobForEachWithEntity<EnemyAttackData>
-    {
-        public EntityCommandBuffer.Concurrent Ecb;
-
-        public float DeltaTime;
-        public EntityArchetype HealthUpdatedArchetype;
-
-        [ReadOnly] public ComponentDataFromEntity<HealthData> Health;
-
-        public void Execute(Entity entity, int index, ref EnemyAttackData attackData)
-        {
-            attackData.Timer += DeltaTime;
-
-            var attacker = attackData.Source;
-            var target = attackData.Target;
-            if (attackData.Timer >= attackData.Frequency &&
-                Health[attacker].Value > 0 &&
-                Health[target].Value > 0)
-            {
-                attackData.Timer = 0f;
-
-                var newHp = Health[target].Value - attackData.Damage;
-                Ecb.SetComponent(index, target, new HealthData { Value = newHp });
-
-                var evt = Ecb.CreateEntity(index, HealthUpdatedArchetype);
-                Ecb.SetComponent(index, evt, new HealthUpdatedEvent { Health = newHp });
-
-                if (newHp <= 0)
-                    Ecb.AddComponent(index, target, new DeadData());
-            }
-        }
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var job = new EnemyAttackJob
-        {
-            Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
-            DeltaTime = Time.DeltaTime,
-            HealthUpdatedArchetype = healthUpdatedEventArchetype,
-            Health = GetComponentDataFromEntity<HealthData>()
-        };
-        inputDeps = job.Schedule(this, inputDeps);
-        barrier.AddJobHandleForProducer(inputDeps);
-        return inputDeps;
+        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+        var health = GetComponentDataFromEntity<HealthData>();
+        var archetypeCopy = healthUpdatedEventArchetype;
+        var time = Time.DeltaTime;
+
+        var jobHandle = Entities
+            .WithReadOnly(health)
+            .ForEach((Entity entity, int entityInQueryIndex, ref EnemyAttackData attackData) =>
+            {
+                attackData.Timer += time;
+
+                var attacker = attackData.Source;
+                var target = attackData.Target;
+                if (attackData.Timer >= attackData.Frequency &&
+                    health[attacker].Value > 0 &&
+                    health[target].Value > 0)
+                {
+                    attackData.Timer = 0f;
+
+                    var newHp = health[target].Value - attackData.Damage;
+                    ecb.SetComponent(entityInQueryIndex, target, new HealthData {Value = newHp});
+
+                    var evt = ecb.CreateEntity(entityInQueryIndex, archetypeCopy);
+                    ecb.SetComponent(entityInQueryIndex, evt, new HealthUpdatedEvent {Health = newHp});
+
+                    if (newHp <= 0)
+                        ecb.AddComponent(entityInQueryIndex, target, new DeadData());
+                }
+            }).Schedule(inputDeps);
+
+        ecbSystem.AddJobHandleForProducer(jobHandle);
+
+        return jobHandle;
     }
 }

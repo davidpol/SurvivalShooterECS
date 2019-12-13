@@ -1,45 +1,32 @@
-﻿using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 
 public class EnemyHealthSystem : JobComponentSystem
 {
-    private EndSimulationEntityCommandBufferSystem barrier;
+    private EndSimulationEntityCommandBufferSystem ecbSystem;
 
     protected override void OnCreate()
     {
-        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-    }
-
-    private struct EnemyHealthJob : IJobForEachWithEntity<EnemyData, HealthData, DamagedData>
-    {
-        public EntityCommandBuffer.Concurrent Ecb;
-
-        [ReadOnly] public ComponentDataFromEntity<DeadData> Dead;
-
-        public void Execute(
-            Entity entity,
-            int index,
-            [ReadOnly] ref EnemyData enemyData,
-            ref HealthData healthData,
-            ref DamagedData damagedData)
-        {
-            healthData.Value -= damagedData.Damage;
-            Ecb.RemoveComponent<DamagedData>(index, entity);
-            if (healthData.Value <= 0 && !Dead.Exists(entity))
-                Ecb.AddComponent(index, entity, new DeadData());
-        }
+        ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var job = new EnemyHealthJob
-        {
-            Ecb = barrier.CreateCommandBuffer().ToConcurrent(),
-            Dead = GetComponentDataFromEntity<DeadData>()
-        };
-        inputDeps = job.Schedule(this, inputDeps);
-        barrier.AddJobHandleForProducer(inputDeps);
-        return inputDeps;
+        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+        var dead = GetComponentDataFromEntity<DeadData>();
+
+        var jobHandle = Entities
+            .WithReadOnly(dead)
+            .ForEach((Entity entity, int entityInQueryIndex, ref HealthData healthData, ref DamagedData damagedData) =>
+            {
+                healthData.Value -= damagedData.Damage;
+                ecb.RemoveComponent<DamagedData>(entityInQueryIndex, entity);
+                if (healthData.Value <= 0 && !dead.Exists(entity))
+                    ecb.AddComponent(entityInQueryIndex, entity, new DeadData());
+            }).Schedule(inputDeps);
+
+        ecbSystem.AddJobHandleForProducer(jobHandle);
+
+        return jobHandle;
     }
 }

@@ -1,6 +1,4 @@
-﻿using Unity.Burst;
-using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -9,7 +7,7 @@ using UnityEngine.InputSystem;
 [DisableAutoCreation]
 public class PlayerInputSystem : JobComponentSystem
 {
-    private EndSimulationEntityCommandBufferSystem barrier;
+    private EndSimulationEntityCommandBufferSystem ecbSystem;
 
     private InputAction moveAction;
     private InputAction lookAction;
@@ -21,7 +19,7 @@ public class PlayerInputSystem : JobComponentSystem
 
     protected override void OnCreate()
     {
-        barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnStartRunning()
@@ -73,34 +71,25 @@ public class PlayerInputSystem : JobComponentSystem
         moveAction.Disable();
     }
 
-    [BurstCompile]
-    private struct PlayerInputJob : IJobForEach<PlayerInputData>
-    {
-        [ReadOnly]
-        public float2 MoveInput;
-        [ReadOnly]
-        public float2 LookInput;
-        [ReadOnly]
-        public float ShootInput;
-
-        public void Execute(ref PlayerInputData inputData)
-        {
-            inputData.Move = MoveInput;
-            inputData.Look = LookInput;
-            inputData.Shoot = ShootInput;
-        }
-    }
-
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var job = new PlayerInputJob
+        var moveInputCopy = moveInput;
+        var lookInputCopy = lookInput;
+        var shootInputCopy = shootInput;
+
+        var jobHandle = Entities
+            .WithReadOnly(moveInputCopy)
+            .WithReadOnly(lookInputCopy)
+            .WithReadOnly(shootInputCopy)
+            .ForEach((Entity entity, ref PlayerInputData inputData) =>
         {
-            MoveInput = moveInput,
-            LookInput = lookInput,
-            ShootInput = shootInput
-        };
-        inputDeps = job.Schedule(this, inputDeps);
-        barrier.AddJobHandleForProducer(inputDeps);
-        return inputDeps;
+            inputData.Move = moveInputCopy;
+            inputData.Look = lookInputCopy;
+            inputData.Shoot = shootInputCopy;
+        }).Schedule(inputDeps);
+
+        ecbSystem.AddJobHandleForProducer(jobHandle);
+
+        return jobHandle;
     }
 }
