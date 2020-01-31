@@ -78,9 +78,6 @@ public class PlayerInputSystem : JobComponentSystem
         var shootInputCopy = shootInput;
 
         var jobHandle = Entities
-            .WithReadOnly(moveInputCopy)
-            .WithReadOnly(lookInputCopy)
-            .WithReadOnly(shootInputCopy)
             .ForEach((Entity entity, ref PlayerInputData inputData) =>
         {
             inputData.Move = moveInputCopy;
