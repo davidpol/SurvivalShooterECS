@@ -2,11 +2,11 @@
 using UnityEngine;
 
 [UpdateBefore(typeof(EnemyHealthSystem))]
-public class EnemyHitFxSystem : ComponentSystem
+public class EnemyHitFxSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        Entities.WithAll<EnemyData>().ForEach(
+        Entities.WithoutBurst().WithAll<EnemyData>().ForEach(
             (Entity entity, AudioSource audio, ref DamagedData damagedData) =>
             {
                 audio.Play();
@@ -15,6 +15,6 @@ public class EnemyHitFxSystem : ComponentSystem
                 var particles = go.GetComponentInChildren<ParticleSystem>();
                 particles.transform.position = damagedData.HitPoint;
                 particles.Play();
-            });
+            }).Run();
     }
 }

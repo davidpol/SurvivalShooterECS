@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class EnemyDeathSystem : ComponentSystem
+public class EnemyDeathSystem : SystemBase
 {
     private int score;
 
@@ -12,7 +12,7 @@ public class EnemyDeathSystem : ComponentSystem
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
         var scorePerDeath = SurvivalShooterBootstrap.Settings.ScorePerDeath;
 
-        Entities.WithAll<EnemyData, DeadData>().ForEach(
+        Entities.WithStructuralChanges().WithAll<EnemyData, DeadData>().ForEach(
             (Entity entity, CapsuleCollider collider, Animator animator, AudioSource audio) =>
             {
                 collider.isTrigger = true;
@@ -26,6 +26,6 @@ public class EnemyDeathSystem : ComponentSystem
 
                 score += scorePerDeath;
                 gameUi.OnEnemyKilled(score);
-            });
+            }).Run();
     }
 }

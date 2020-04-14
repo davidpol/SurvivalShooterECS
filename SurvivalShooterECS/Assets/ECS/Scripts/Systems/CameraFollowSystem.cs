@@ -2,14 +2,14 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class CameraFollowSystem : ComponentSystem
+public class CameraFollowSystem : SystemBase
 {
     private bool firstFrame = true;
     private Vector3 offset;
 
     protected override void OnUpdate()
     {
-        Entities.ForEach((Entity entity, Transform transform, ref PlayerInputData data) =>
+        Entities.WithoutBurst().ForEach((Entity entity, Transform transform, ref PlayerInputData data) =>
         {
             var mainCamera = Camera.main;
             if (mainCamera == null)
@@ -29,6 +29,6 @@ public class CameraFollowSystem : ComponentSystem
             var targetCamPos = playerPos + offset;
             mainCamera.transform.position =
                 Vector3.Lerp(mainCamera.transform.position, targetCamPos, smoothing * dt);
-        });
+        }).Run();
     }
 }

@@ -1,34 +1,35 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class PlayerHitFxSystem : ComponentSystem
+public class PlayerHitFxSystem : SystemBase
 {
     private static readonly int DieHash = Animator.StringToHash("Die");
 
     protected override void OnUpdate()
     {
         var gameUi = SurvivalShooterBootstrap.Settings.GameUi;
-
-        Entities.ForEach((Entity entity, ref HealthUpdatedEvent hp) =>
+        int health = int.MaxValue;
+        
+        Entities.WithStructuralChanges().ForEach((Entity entity, ref HealthUpdatedEvent hp) =>
         {
-            PostUpdateCommands.DestroyEntity(entity);
+            EntityManager.DestroyEntity(entity);
 
             gameUi.OnPlayerTookDamage(hp.Health);
 
-            var health = hp.Health;
-            Entities.WithAll<PlayerData>().ForEach((AudioSource audio, Animator animator) =>
+            health = Mathf.Min(health, hp.Health);
+        }).Run();
+        
+        Entities.WithoutBurst().WithAll<PlayerData>().ForEach((AudioSource audio, Animator animator) =>
+        {
+            if (health <= 0)
             {
-                if (health <= 0)
-                {
-                    var playerDeathClip = SurvivalShooterBootstrap.Settings.PlayerDeathClip;
-                    audio.clip = playerDeathClip;
+                var playerDeathClip = SurvivalShooterBootstrap.Settings.PlayerDeathClip;
+                audio.clip = playerDeathClip;
 
-                    animator.SetTrigger(DieHash);
-                }
+                animator.SetTrigger(DieHash);
+            }
 
-                audio.Play();
-            });
-        });
-
+            audio.Play();
+        }).Run();
     }
 }

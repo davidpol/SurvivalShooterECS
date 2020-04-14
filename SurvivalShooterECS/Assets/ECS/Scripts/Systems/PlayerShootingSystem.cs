@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class PlayerShootingSystem : ComponentSystem
+public class PlayerShootingSystem : SystemBase
 {
     private float timer;
 
@@ -17,7 +17,7 @@ public class PlayerShootingSystem : ComponentSystem
 
                 if (input.Shoot > 0.0f)
                     playerShot = true;
-            });
+            }).Run();
 
         if (hasToExit)
             return;
@@ -27,7 +27,7 @@ public class PlayerShootingSystem : ComponentSystem
         var timeBetweenBullets = SurvivalShooterBootstrap.Settings.TimeBetweenBullets;
         var effectsDisplayTime = SurvivalShooterBootstrap.Settings.GunEffectsDisplayTime;
 
-        Entities.WithAll<PlayerGunData>().ForEach(
+        Entities.WithStructuralChanges().WithAll<PlayerGunData>().ForEach(
             (Entity entity, AudioSource audio, Light light, ParticleSystem particles, LineRenderer line) =>
             {
                 if (playerShot && timer > timeBetweenBullets)
@@ -35,7 +35,7 @@ public class PlayerShootingSystem : ComponentSystem
 
                 if (timer >= timeBetweenBullets * effectsDisplayTime)
                     DisableEffects(light, line);
-            });
+            }).Run();
     }
 
     private void Shoot(AudioSource audio, Light light, ParticleSystem particles, LineRenderer line)
@@ -69,7 +69,7 @@ public class PlayerShootingSystem : ComponentSystem
             {
                 var hitEntity = enemyObj.GetComponent<EnemyObject>().Entity;
                 if (!EntityManager.HasComponent<DamagedData>(hitEntity))
-                    PostUpdateCommands.AddComponent(hitEntity, new DamagedData
+                    EntityManager.AddComponentData(hitEntity, new DamagedData
                     {
                         Damage = SurvivalShooterBootstrap.Settings.DamagePerShot,
                         HitPoint = shootHit.point
