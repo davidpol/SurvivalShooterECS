@@ -9,8 +9,8 @@ public class PlayerMovementSystem : SystemBase
         var speed = SurvivalShooterBootstrap.Settings.PlayerMoveSpeed;
         var dt = Time.DeltaTime;
 
-        Entities.WithoutBurst().WithAll<PlayerInputData>().WithNone<DeadData>().ForEach(
-            (Entity entity, Rigidbody rigidBody, ref PlayerInputData input) =>
+        Entities.WithoutBurst().WithNone<DeadData>().ForEach(
+            (Entity entity, Rigidbody rigidBody, in PlayerInputData input) =>
             {
                 var move = input.Move;
 
