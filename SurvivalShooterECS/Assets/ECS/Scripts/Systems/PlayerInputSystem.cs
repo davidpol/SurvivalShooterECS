@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DisableAutoCreation]
-public class PlayerInputSystem : JobComponentSystem
+public class PlayerInputSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
 
@@ -71,22 +71,20 @@ public class PlayerInputSystem : JobComponentSystem
         moveAction.Disable();
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         var moveInputCopy = moveInput;
         var lookInputCopy = lookInput;
         var shootInputCopy = shootInput;
 
-        var jobHandle = Entities
+        Entities
             .ForEach((Entity entity, ref PlayerInputData inputData) =>
         {
             inputData.Move = moveInputCopy;
             inputData.Look = lookInputCopy;
             inputData.Shoot = shootInputCopy;
-        }).Schedule(inputDeps);
+        }).ScheduleParallel();
 
-        ecbSystem.AddJobHandleForProducer(jobHandle);
-
-        return jobHandle;
+        ecbSystem.AddJobHandleForProducer(Dependency);
     }
 }

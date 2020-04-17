@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class PlayerTurningSystem : ComponentSystem
+public class PlayerTurningSystem : SystemBase
 {
     protected override void OnUpdate()
     {
@@ -13,8 +13,8 @@ public class PlayerTurningSystem : ComponentSystem
         var camRayLen = SurvivalShooterBootstrap.Settings.CamRayLen;
         var floor = LayerMask.GetMask("Floor");
 
-        Entities.WithAll<PlayerData>().WithNone<DeadData>().ForEach(
-            (Entity entity, ref PlayerInputData input, Rigidbody rigidBody) =>
+        Entities.WithoutBurst().WithAll<PlayerData>().WithNone<DeadData>().ForEach(
+            (Entity entity, Rigidbody rigidBody, in PlayerInputData input) =>
             {
                 var mousePos = new Vector3(input.Look.x, input.Look.y, 0);
                 var camRay = mainCamera.ScreenPointToRay(mousePos);
@@ -27,6 +27,6 @@ public class PlayerTurningSystem : ComponentSystem
                     var newRot = Quaternion.LookRotation(playerToMouse);
                     rigidBody.MoveRotation(newRot);
                 }
-            });
+            }).Run();
     }
 }

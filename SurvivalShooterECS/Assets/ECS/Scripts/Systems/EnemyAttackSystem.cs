@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
 
-public class EnemyAttackSystem : JobComponentSystem
+public class EnemyAttackSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
     private EntityArchetype healthUpdatedEventArchetype;
@@ -12,14 +12,14 @@ public class EnemyAttackSystem : JobComponentSystem
         healthUpdatedEventArchetype = EntityManager.CreateArchetype(typeof(HealthUpdatedEvent));
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
         var health = GetComponentDataFromEntity<HealthData>();
         var archetypeCopy = healthUpdatedEventArchetype;
         var time = Time.DeltaTime;
 
-        var jobHandle = Entities
+        Entities
             .WithReadOnly(health)
             .ForEach((Entity entity, int entityInQueryIndex, ref EnemyAttackData attackData) =>
             {
@@ -42,10 +42,8 @@ public class EnemyAttackSystem : JobComponentSystem
                     if (newHp <= 0)
                         ecb.AddComponent(entityInQueryIndex, target, new DeadData());
                 }
-            }).Schedule(inputDeps);
+            }).ScheduleParallel();
 
-        ecbSystem.AddJobHandleForProducer(jobHandle);
-
-        return jobHandle;
+        ecbSystem.AddJobHandleForProducer(Dependency);
     }
 }

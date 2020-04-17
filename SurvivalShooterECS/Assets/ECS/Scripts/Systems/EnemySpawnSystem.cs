@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class EnemySpawnSystem : ComponentSystem
+public class EnemySpawnSystem : SystemBase
 {
     private EntityQuery spawnerQuery;
 
@@ -20,12 +20,12 @@ public class EnemySpawnSystem : ComponentSystem
         GameObject player = null;
         var playerHp = 0;
 
-        Entities.WithAll<PlayerData>().ForEach(
+        Entities.WithoutBurst().WithAll<PlayerData>().ForEach(
             (Entity entity, Transform transform, ref HealthData hp) =>
             {
                 player = transform.gameObject;
                 playerHp = hp.Value;
-            });
+            }).Run();
 
         if (player == null || playerHp <= 0)
             return;

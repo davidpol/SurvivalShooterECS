@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
 
-public class EnemyHealthSystem : JobComponentSystem
+public class EnemyHealthSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
 
@@ -10,12 +10,12 @@ public class EnemyHealthSystem : JobComponentSystem
         ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
         var dead = GetComponentDataFromEntity<DeadData>();
 
-        var jobHandle = Entities
+        Entities
             .WithReadOnly(dead)
             .ForEach((Entity entity, int entityInQueryIndex, ref HealthData healthData, ref DamagedData damagedData) =>
             {
@@ -23,10 +23,8 @@ public class EnemyHealthSystem : JobComponentSystem
                 ecb.RemoveComponent<DamagedData>(entityInQueryIndex, entity);
                 if (healthData.Value <= 0 && !dead.Exists(entity))
                     ecb.AddComponent(entityInQueryIndex, entity, new DeadData());
-            }).Schedule(inputDeps);
+            }).ScheduleParallel();
 
-        ecbSystem.AddJobHandleForProducer(jobHandle);
-
-        return jobHandle;
+        ecbSystem.AddJobHandleForProducer(Dependency);
     }
 }

@@ -2,15 +2,15 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class PlayerMovementSystem : ComponentSystem
+public class PlayerMovementSystem : SystemBase
 {
     protected override void OnUpdate()
     {
         var speed = SurvivalShooterBootstrap.Settings.PlayerMoveSpeed;
         var dt = Time.DeltaTime;
 
-        Entities.WithAll<PlayerInputData>().WithNone<DeadData>().ForEach(
-            (Entity entity, Rigidbody rigidBody, ref PlayerInputData input) =>
+        Entities.WithoutBurst().WithNone<DeadData>().ForEach(
+            (Entity entity, Rigidbody rigidBody, in PlayerInputData input) =>
             {
                 var move = input.Move;
 
@@ -21,6 +21,6 @@ public class PlayerMovementSystem : ComponentSystem
                 var position = go.transform.position;
                 var newPos = new Vector3(position.x, position.y, position.z) + movement;
                 rigidBody.MovePosition(newPos);
-            });
+            }).Run();
     }
 }
