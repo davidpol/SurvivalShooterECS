@@ -12,7 +12,7 @@ public class EnemyHealthSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+        var ecb = ecbSystem.CreateCommandBuffer().AsParallelWriter();
         var dead = GetComponentDataFromEntity<DeadData>();
 
         Entities
@@ -21,7 +21,7 @@ public class EnemyHealthSystem : SystemBase
             {
                 healthData.Value -= damagedData.Damage;
                 ecb.RemoveComponent<DamagedData>(entityInQueryIndex, entity);
-                if (healthData.Value <= 0 && !dead.Exists(entity))
+                if (healthData.Value <= 0 && !dead.HasComponent(entity))
                     ecb.AddComponent(entityInQueryIndex, entity, new DeadData());
             }).ScheduleParallel();
 

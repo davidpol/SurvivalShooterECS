@@ -14,7 +14,7 @@ public class EnemyAttackSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+        var ecb = ecbSystem.CreateCommandBuffer().AsParallelWriter();
         var health = GetComponentDataFromEntity<HealthData>();
         var archetypeCopy = healthUpdatedEventArchetype;
         var time = Time.DeltaTime;
