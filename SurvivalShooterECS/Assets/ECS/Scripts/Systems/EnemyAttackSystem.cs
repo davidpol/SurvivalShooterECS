@@ -21,6 +21,7 @@ public class EnemyAttackSystem : SystemBase
 
         Entities
             .WithReadOnly(health)
+            .WithNone<DeadData>()
             .ForEach((Entity entity, int entityInQueryIndex, ref EnemyAttackData attackData) =>
             {
                 attackData.Timer += time;
@@ -28,6 +29,7 @@ public class EnemyAttackSystem : SystemBase
                 var attacker = attackData.Source;
                 var target = attackData.Target;
                 if (attackData.Timer >= attackData.Frequency &&
+                    health.HasComponent(attacker) &&
                     health[attacker].Value > 0 &&
                     health[target].Value > 0)
                 {
