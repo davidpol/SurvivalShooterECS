@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [UpdateBefore(typeof(EnemyHealthSystem))]
-public class EnemyHitFxSystem : SystemBase
+public partial class EnemyHitFxSystem : SystemBase
 {
     protected override void OnUpdate()
     {

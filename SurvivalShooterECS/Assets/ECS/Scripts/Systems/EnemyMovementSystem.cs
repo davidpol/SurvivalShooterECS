@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyMovementSystem : SystemBase
+public partial class EnemyMovementSystem : SystemBase
 {
     protected override void OnUpdate()
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class PlayerAnimationSystem : SystemBase
+public partial class PlayerAnimationSystem : SystemBase
 {
     private static readonly int IsWalkingHash = Animator.StringToHash("IsWalking");
 

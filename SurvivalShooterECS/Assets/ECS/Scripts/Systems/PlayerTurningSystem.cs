@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class PlayerTurningSystem : SystemBase
+public partial class PlayerTurningSystem : SystemBase
 {
     protected override void OnUpdate()
     {

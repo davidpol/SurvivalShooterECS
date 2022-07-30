@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
 
-public class EnemyAttackSystem : SystemBase
+public partial class EnemyAttackSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
     private EntityArchetype healthUpdatedEventArchetype;

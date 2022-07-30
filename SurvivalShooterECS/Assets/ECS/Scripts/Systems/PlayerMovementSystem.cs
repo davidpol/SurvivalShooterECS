@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class PlayerMovementSystem : SystemBase
+public partial class PlayerMovementSystem : SystemBase
 {
     protected override void OnUpdate()
     {

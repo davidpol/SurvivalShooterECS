@@ -1,9 +1,15 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class PlayerShootingSystem : SystemBase
+public partial class PlayerShootingSystem : SystemBase
 {
     private float timer;
+
+    private PlayerGunObject gun;
+    private AudioSource audio;
+    private LineRenderer line;
+    private Light light;
+    private ParticleSystem particles;
 
     protected override void OnUpdate()
     {
@@ -27,18 +33,18 @@ public class PlayerShootingSystem : SystemBase
         var timeBetweenBullets = SurvivalShooterBootstrap.Settings.TimeBetweenBullets;
         var effectsDisplayTime = SurvivalShooterBootstrap.Settings.GunEffectsDisplayTime;
 
-        Entities.WithStructuralChanges().WithAll<PlayerGunData>().ForEach(
-            (Entity entity, AudioSource audio, Light light, ParticleSystem particles, LineRenderer line) =>
-            {
-                if (playerShot && timer > timeBetweenBullets)
-                    Shoot(audio, light, particles, line);
+        InitializeGun();
+        if (gun != null)
+        {
+            if (playerShot && timer > timeBetweenBullets)
+                Shoot();
 
-                if (timer >= timeBetweenBullets * effectsDisplayTime)
-                    DisableEffects(light, line);
-            }).Run();
+            if (timer >= timeBetweenBullets * effectsDisplayTime)
+                DisableEffects();
+        }
     }
 
-    private void Shoot(AudioSource audio, Light light, ParticleSystem particles, LineRenderer line)
+    private void Shoot()
     {
         timer = 0f;
 
@@ -49,8 +55,9 @@ public class PlayerShootingSystem : SystemBase
         particles.Stop();
         particles.Play();
 
-        var go = audio.gameObject;
+        var go = GameObject.FindObjectOfType<PlayerObject>().GunPivot;
         var pos = go.transform.position;
+        particles.transform.position = pos;
         line.enabled = true;
         line.SetPosition(0, pos);
 
@@ -84,9 +91,24 @@ public class PlayerShootingSystem : SystemBase
         }
     }
 
-    private void DisableEffects(Light light, LineRenderer line)
+    private void DisableEffects()
     {
         light.enabled = false;
         line.enabled = false;
+    }
+
+    private void InitializeGun()
+    {
+        if (gun == null)
+        {
+            gun = GameObject.FindObjectOfType<PlayerGunObject>();
+            if (gun != null)
+            {
+                audio = gun.GetComponent<AudioSource>();
+                line = gun.GetComponent<LineRenderer>();
+                light = gun.GetComponent<Light>();
+                particles = gun.GetComponent<ParticleSystem>();
+            }
+        }
     }
 }

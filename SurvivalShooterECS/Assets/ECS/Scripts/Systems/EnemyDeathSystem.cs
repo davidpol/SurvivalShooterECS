@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class EnemyDeathSystem : SystemBase
+public partial class EnemyDeathSystem : SystemBase
 {
     private int score;
 

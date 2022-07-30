@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DisableAutoCreation]
-public class PlayerInputSystem : SystemBase
+public partial class PlayerInputSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
 

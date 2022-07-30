@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
 
-public class EnemyHealthSystem : SystemBase
+public partial class EnemyHealthSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem ecbSystem;
 

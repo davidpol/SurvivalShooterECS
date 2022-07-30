@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class EnemySpawnSystem : SystemBase
+public partial class EnemySpawnSystem : SystemBase
 {
     private EntityQuery spawnerQuery;
 

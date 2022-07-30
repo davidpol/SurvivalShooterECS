@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisableAutoCreation]
-public class CameraFollowSystem : SystemBase
+public partial class CameraFollowSystem : SystemBase
 {
     private bool firstFrame = true;
     private Vector3 offset;
